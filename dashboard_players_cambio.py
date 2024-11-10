@@ -185,8 +185,8 @@ def plot_combined_chart(player_df, uc1_df, player_name):
             side='right',
             position=0.5,
             showgrid=True,
-            titlefont=dict(color=brand_colors["CINZA"]),  # Coloração para o eixo UC1
-            tickfont=dict(color=brand_colors["CINZA"])
+            titlefont=dict(color=brand_colors["CREME"]),  # Coloração para o eixo UC1
+            tickfont=dict(color=brand_colors["CREME"])
         ),
         barmode='stack',
         plot_bgcolor='rgba(0,0,0,0)',
