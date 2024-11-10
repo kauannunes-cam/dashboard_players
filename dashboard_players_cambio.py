@@ -17,6 +17,7 @@ import os
 um_dia = datetime.timedelta(days=1)
 hoje = datetime.datetime.today()
 data_final = hoje.strftime('%Y-%m-%d')
+data_inicial = datetime.date(2024, 1, 1)  # Define o início em 2024
 
 
 players = ['estrangeiro', 'flocal', 'bancos', 'pj', 'pf']
@@ -104,7 +105,21 @@ for player, dfs in all_dataframes.items():
     combined_df['var_liq_diaria'] = combined_df['saldo'].diff()
     globals()[f'df_{player}'] = combined_df
 
+# Configurações de layout do dashboard com Streamlit
+st.set_page_config(layout="wide")
 
+# Configuração do título com filtro de data ao lado
+col1, col2 = st.columns([3, 2])
+with col1:
+    st.title("Análise de Posições dos Players")
+with col2:
+    col1, col2 = st.columns([2, 2])
+    with col1:
+        start_date = st.date_input("Data Inicial", value=data_inicial)
+    with col2:
+        end_date = st.date_input("Data Final", value=hoje)
+
+st.divider()
 
 
 # Função para carregar a imagem e converter para base64
@@ -126,7 +141,7 @@ def plot_combined_chart(player_df, uc1_df, player_name):
     fig = go.Figure()
 
     # Exibir apenas os últimos 60 dias no preview
-    recent_df = player_df[-60:]
+    recent_df = player_df[start_date:]
 
     # Gráfico de linhas de saldo e UC1
     fig.add_trace(go.Scatter(
@@ -217,8 +232,6 @@ def plot_combined_chart(player_df, uc1_df, player_name):
     )
     return fig
 
-# Configurações de layout do dashboard com Streamlit
-st.set_page_config(layout="wide")
 
 # Exibir título do dashboard
 st.title("Análise de Posições dos Players")
