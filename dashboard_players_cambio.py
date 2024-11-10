@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 import datetime
 import locale
 import os
+import openpyxl
 
 um_dia = datetime.timedelta(days=1)
 hoje = datetime.datetime.today()
