@@ -134,7 +134,7 @@ def plot_combined_chart(player_df, uc1_df, player_name):
         y=recent_df['saldo'],
         mode='lines',
         name=f"{player_name} Saldo",
-        line=dict(color=brand_colors["PRETO"], shape='spline'),
+        line=dict(color=brand_colors["CREME"], shape='spline'),
         yaxis="y2",
         showlegend=True
     ))
@@ -169,16 +169,16 @@ def plot_combined_chart(player_df, uc1_df, player_name):
             title='Contratos (U$$)',
             side='left',
             showgrid=False,
-            titlefont=dict(color=brand_colors["PRETO"]),  # Coloração para o eixo das barras
-            tickfont=dict(color=brand_colors["PRETO"])
+            titlefont=dict(color=brand_colors["CREME"]),  # Coloração para o eixo das barras
+            tickfont=dict(color=brand_colors["CREME"])
         ),
         yaxis2=dict(
             title='Saldo de Contratos (U$$)',
             overlaying='y',
             side='right',
             showgrid=False,
-            titlefont=dict(color=brand_colors["PRETO"]),  # Coloração para o eixo do saldo
-            tickfont=dict(color=brand_colors["PRETO"])
+            titlefont=dict(color=brand_colors["CREME"]),  # Coloração para o eixo do saldo
+            tickfont=dict(color=brand_colors["CREME"])
         ),
         yaxis3=dict(
             overlaying='y',
@@ -200,7 +200,7 @@ def plot_combined_chart(player_df, uc1_df, player_name):
             xanchor="center",
             yanchor="top",
             bgcolor='rgba(255, 255, 255, 0.5)',
-            bordercolor="Black",
+            bordercolor="White",
             borderwidth=1
         )
     )
