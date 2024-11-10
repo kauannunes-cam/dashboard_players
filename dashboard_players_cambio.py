@@ -29,7 +29,7 @@ brand_colors = {
     "VERDE_PRINCIPAL": "#2B6960",
     "VERDE_DETALHES": "#49E2B1",
     "CREME": "#FFFCF5",
-    "CINZA": "#76807D",
+    "CINZA": "#969B91",
     "PRETO": "#1B1B1B"
 }
 colors = [brand_colors["VERDE_DETALHES"], "#3498DB", "#F1C40F", "#E74C3C", "#8E44AD"]
@@ -185,8 +185,8 @@ def plot_combined_chart(player_df, uc1_df, player_name):
             side='right',
             position=0.5,
             showgrid=True,
-            titlefont=dict(color=brand_colors["CREME"]),  # Coloração para o eixo UC1
-            tickfont=dict(color=brand_colors["CREME"])
+            titlefont=dict(color=brand_colors["CINZA"]),  # Coloração para o eixo UC1
+            tickfont=dict(color=brand_colors["CINZA"])
         ),
         barmode='stack',
         plot_bgcolor='rgba(0,0,0,0)',
