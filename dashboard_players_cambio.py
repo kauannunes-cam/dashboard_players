@@ -12,7 +12,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import datetime
 import locale
-locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 import os
 
 um_dia = datetime.timedelta(days=1)
