@@ -112,16 +112,28 @@ for player, dfs in all_dataframes.items():
 st.set_page_config(layout="wide")
 
 # Configuração do título com filtro de data ao lado
-col1, col2 = st.columns([3, 2])
+col1, col2 = st.columns([2, 2])
 with col1:
     st.title("Análise de Posições dos Players")
-with col2:
-    col1, col2 = st.columns([2, 2])
-    with col1:
-        start_date = st.date_input("Data Inicial", value=data_inicial, min_value=data_minima, max_value=data_menor_inicial)
-    with col2:
-        end_date = st.date_input("Data Final", value=hoje, max_value=hoje)
 
+with col2:
+    # Criando colunas para organizar as datas e o checkbox
+    date_col1, date_col2 = st.columns([2, 2])
+    
+    # Filtro de data inicial
+    with date_col1:
+        start_date = st.date_input("Data Inicial", value=data_inicial, min_value=data_minima, max_value=hoje)
+
+    # Filtro de data final e checkbox para definir "Hoje"
+    with date_col2:
+        end_date = st.date_input("Data Final", value=hoje, min_value=data_minima, max_value=hoje)
+        # Checkbox para definir Data Final como Hoje, posicionado abaixo
+        set_end_today = st.checkbox("Hoje", key="end_today")
+        if set_end_today:
+            end_date = hoje  # Redefine a data final para hoje se o checkbox estiver marcado
+
+
+        
 st.divider()
 
 
@@ -144,7 +156,7 @@ def plot_combined_chart(player_df, uc1_df, player_name):
     fig = go.Figure()
 
     # Exibir apenas os últimos 60 dias no preview
-    recent_df = player_df[start_date:]
+    recent_df = player_df[start_date:end_date]
 
     # Gráfico de linhas de saldo e UC1
     fig.add_trace(go.Scatter(
@@ -229,15 +241,13 @@ def plot_combined_chart(player_df, uc1_df, player_name):
             x=0.5, y=0.5,
             sizex=0.9, sizey=0.9,
             xanchor="center", yanchor="middle",
-            opacity=0.2,
+            opacity=0.4,
             layer="below"
         )
     )
     return fig
 
 
-# Exibir título do dashboard
-st.title("Análise de Posições dos Players")
 
 # Primeira linha - Estrangeiros e Fundo Local
 col1, col2 = st.columns(2)
