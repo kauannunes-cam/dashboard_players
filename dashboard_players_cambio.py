@@ -36,8 +36,8 @@ colors = [brand_colors["VERDE_DETALHES"], "#3498DB", "#F1C40F", "#E74C3C", "#8E4
 
 
 # Caminho para os arquivos Excel
-file_path_saldos = 'C:\\Users\\Kauan\\OneDrive - Cambirela\\3 - Cambirela Tabelas Excel\\History dollar B3.xlsx'
-file_path_uc1 = 'C:\\Users\\Kauan\\OneDrive - Cambirela\\3 - Cambirela Tabelas Excel\\History Cot.xlsx'
+file_path_saldos = '\History dollar B3.xlsx'
+file_path_uc1 = '\History Cot.xlsx'
 
 # Carrega todas as planilhas de saldos em um dicionário de dataframes
 excel_data_saldos = pd.read_excel(file_path_saldos, sheet_name=None, skiprows=2)
@@ -62,7 +62,7 @@ uc1_df = ativos_selected['UC1']
 
 
 # Caminho para o arquivo Excel
-file_path = 'C:\\Users\\Kauan\\OneDrive - Cambirela\\3 - Cambirela Tabelas Excel\\History dollar B3 - Copiar.xlsx'
+file_path = '\History dollar B3.xlsx'
 
 # Carrega todas as planilhas em um dicionário de dataframes
 excel_data = pd.read_excel(file_path, sheet_name=None, skiprows=2)
@@ -115,7 +115,7 @@ def load_image_as_base64(image_path):
     return base64.b64encode(buffered.getvalue()).decode()
 
 # Caminho da logo (ajuste conforme necessário)
-logo_path = "C:\\Users\\Kauan\\OneDrive\\Área de Trabalho\\Tela Trabalho\\Arquivos\\CAMBIRELA HUB\\OneDrive_2023-12-07\\MARKETING Cambirela\\Icones & Fotos de Perfil\\C opção 1 transparente.png"
+logo_path = "\C opção 1 transparente.png"
 
 
 # Carregar logo como base64 para usar em marca d'água
