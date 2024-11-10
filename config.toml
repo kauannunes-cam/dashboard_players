@@ -1,0 +1,8 @@
+# Configurações de tema
+[theme]
+base = "light"                  # Escolha entre "light" e "dark" para tema padrão
+primaryColor = "#1F4741"        # Cor primária da sua marca
+backgroundColor = "#FFFFFF"     # Cor de fundo
+secondaryBackgroundColor = "#F8F9FA"  # Cor de fundo secundária (como sidebar)
+textColor = "#000000"           # Cor do texto
+font = "sans serif"             # Fonte padrão
