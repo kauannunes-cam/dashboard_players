@@ -15,9 +15,12 @@ import locale
 import os
 
 um_dia = datetime.timedelta(days=1)
+cinco_dia = datetime.timedelta(days=5)
 hoje = datetime.datetime.today()
 data_final = hoje.strftime('%Y-%m-%d')
 data_inicial = datetime.date(2024, 8, 1)  # Define o início em 2024
+data_minima = datetime.date(2010, 1, 1)  # Define o início em 2024
+data_menor_inicial = hoje - cinco_dia # Define o início em 2024
 
 
 players = ['estrangeiro', 'flocal', 'bancos', 'pj', 'pf']
@@ -115,9 +118,9 @@ with col1:
 with col2:
     col1, col2 = st.columns([2, 2])
     with col1:
-        start_date = st.date_input("Data Inicial", value=data_inicial)
+        start_date = st.date_input("Data Inicial", value=data_inicial, min_value=data_minima, max_value=data_menor_inicial)
     with col2:
-        end_date = st.date_input("Data Final", value=hoje)
+        end_date = st.date_input("Data Final", value=hoje, max_value=hoje)
 
 st.divider()
 
