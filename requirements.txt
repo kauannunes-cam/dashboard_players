@@ -6,7 +6,6 @@ matplotlib
 numpy
 yfinance
 openpyxl
-PIL
 keras
 sklearn
 
