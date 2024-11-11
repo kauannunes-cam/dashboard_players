@@ -51,7 +51,7 @@ st.set_page_config(layout="wide")
 
 @st.cache_data
 def carregar_dados():
-    xls = pd.ExcelFile("C:\\Users\\Kauan\\OneDrive - Cambirela\\3 - Cambirela Tabelas Excel\\History Cot.xlsx")
+    xls = pd.ExcelFile(".\History Cot.xlsx")
     ativos = {}
     for sheet_name in xls.sheet_names:
         df = pd.read_excel(xls, sheet_name=sheet_name, skiprows=2)
