@@ -7,5 +7,5 @@ numpy
 yfinance
 openpyxl
 keras
-sklearn
+tensorflow
 
