@@ -15,7 +15,7 @@ import numpy as np
 
 hoje = datetime.datetime.today()
 
-
+dp = 8
 
 def formatar_moeda(valor):
     valor_str = f"R$ {valor:,.2f}"  # Formata com separador de milhar e duas casas decimais
@@ -203,7 +203,18 @@ direcoes_mercado = get_direcao_projetada(ativos_selected)
 
 
 
+
+################################################################
+
 st.divider()
+
+st.write("Total da Posição kkkkkkkkkkkk:")
+
+st.divider()
+
+
+################################################################
+
 ########### Filtros ###########
 col1, col2, col3 = st.columns([2, 3, 2])
 
@@ -248,9 +259,16 @@ media_desvios_series_1 = pd.concat([desviop_7d_1, desviop_14d_1, desviop_21d_1],
 media_desvios_perc_1 = media_desvios_1 * 100
 
 
+if periodo_volatilidade == "3 Meses":
+    dias = 90
+elif periodo_volatilidade == "6 Meses":
+    dias = 180
+else:
+    dias = 252
+
 # Filtragem e cálculos de volatilidade baseados na data final selecionada
-df_filtrado = df.loc[:str(data_final)].tail(60)
-df_filtrado['Preço_Suave'] = df_filtrado['Preço'].rolling(window=7).mean()
+df_filtrado = df.loc[:str(data_final)].tail(dias)
+df_filtrado['Preço_Suave'] = df_filtrado['Preço']
 
 # Calcular a volatilidade diária como média dos desvios de 7, 14 e 21 dias
 ultimo_ajuste = df_filtrado['Preço'].iloc[-1]
@@ -285,11 +303,10 @@ elif periodo_volatilidade == "12 Meses":
 # Obter a última volatilidade calculada
 volatilidade_atual = media_desvios_series.iloc[-1] * 100 if not media_desvios_series.empty else float('nan')
 
-
 # Cálculo das linhas dos desvios e suas variações percentuais
-desvios = [ultimo_ajuste + i * media_desvios * ultimo_ajuste for i in range(1, 6)]
-desvios_neg = [ultimo_ajuste - i * media_desvios * ultimo_ajuste for i in range(1, 6)]
+desvios = [ultimo_ajuste + i * media_desvios * ultimo_ajuste for i in range(1, dp)]
 desvios_percentuais = [(desvio - ultimo_ajuste) / ultimo_ajuste * 100 for desvio in desvios]
+desvios_neg = [ultimo_ajuste - i * media_desvios * ultimo_ajuste for i in range(1, dp)]
 desvios_neg_percentuais = [(desvio - ultimo_ajuste) / ultimo_ajuste * 100 for desvio in desvios_neg]
 
 
@@ -300,17 +317,18 @@ fig_volatilidade = go.Figure()
 fig_volatilidade.add_trace(go.Scatter(
     x=df_filtrado.index, y=df_filtrado['Preço_Suave'],
     mode='lines', name='Preço Suavizado',
-    line=dict(color=brand_colors['CREME'])
+    line=dict(color=brand_colors['CREME']),
+    showlegend=True
 ))
 
-# Adicionar linhas de desvios padrão com variação percentual no gráfico
+# Adicionar linhas de desvios padrão com variação percentual e valores no gráfico
 for i, (up, down, perc_up, perc_down) in enumerate(zip(desvios, desvios_neg, desvios_percentuais, desvios_neg_percentuais), start=1):
     # Linha de desvio positivo
     fig_volatilidade.add_trace(go.Scatter(
         x=df_filtrado.index[-10:], y=[up] * 10,
         mode='lines+text',
         line=dict(dash='dash', color=brand_colors['VERDE_TEXTO']),
-        text=[''] * 5 + [f'+{i} DP <b style="color:#1F4741; font-size:18px;">(+{perc_up:.2f}%)</b>'] + [''] * 4,
+        text=[''] * dp + [f'+{i} DP | {up:.2f} | <b style="color:#1F4741; font-size:18px;">(+{perc_up:.2f}%)</b>'] + [''] * 4,
         textposition="top center",  # Ajuste de posição para colocar o texto acima da linha
         textfont=dict(color="#FFFCF5", size=14),
         showlegend=False
@@ -321,11 +339,30 @@ for i, (up, down, perc_up, perc_down) in enumerate(zip(desvios, desvios_neg, des
         x=df_filtrado.index[-10:], y=[down] * 10,
         mode='lines+text',
         line=dict(dash='dash', color=brand_colors['VERDE_TEXTO']),
-        text=[''] * 4 + [f'-{i} DP <b style="color:#49E2B1; font-size:18px;">({perc_down:.2f}%)</b>'] + [''] * 5,
+        text=[''] * dp + [f'-{i} DP | {down:.2f} | <b style="color:#49E2B1; font-size:18px;">({perc_down:.2f}%)</b>'] + [''] * 5,
         textposition="top center",  # Ajuste de posição para colocar o texto acima da linha
         textfont=dict(color="#FFFCF5", size=14),
         showlegend=False
     ))
+    
+# Linha de "Último Ajuste" no meio
+fig_volatilidade.add_trace(go.Scatter(
+    x=df_filtrado.index[-10:], y=[ultimo_ajuste] * 10,
+    mode='lines+text',
+    line=dict(color="white", width=2),
+    text=[''] * 9 + [f'Ajust. Ant {ultimo_ajuste:.2f}'],
+
+))
+
+
+# Adiciona uma linha horizontal no preço atual
+fig_volatilidade.add_trace(go.Scatter(
+    x=df_filtrado.index[-10:], y=[ultimo_ajuste] * 10,
+    mode='lines',
+    line=dict(color="white", width=2),
+    name='Último Ajuste',  # Nome definido para aparecer na legenda
+    showlegend=True
+))
 
 # Adicionar volatilidade média e volatilidade do período no gráfico
 fig_volatilidade.add_annotation(
@@ -350,7 +387,9 @@ if exibir_medias_moveis:
     df['Media_200'] = df['Preço'].rolling(window=200).mean()
 
 # Depois de calcular, filtrar os últimos 60 dias para visualização
-df_visualizacao = df.loc[:str(data_final)].tail(60)
+df_visualizacao = df.loc[:str(data_final)].tail(dias)
+
+
 
 # Adicionar médias móveis ao gráfico usando apenas o trecho filtrado
 if exibir_medias_moveis:
@@ -390,7 +429,8 @@ fig_volatilidade.add_trace(go.Bar(
         brand_colors['VERDE_DETALHES'] if v >= 0 else brand_colors['VERDE_TEXTO'] 
         for v in df_visualizacao['Variação (%)']
     ],
-    yaxis='y2'
+    yaxis='y2',
+    showlegend=True
 ))
 
 # Configurar eixos
@@ -456,7 +496,7 @@ fig_volatilidade.add_annotation(
     font=dict(color=brand_colors['VERDE_DETALHES']),
     xshift=0,  # Deslocamento horizontal para a direita
     yshift=5,  # Ajusta para aparecer acima da barra
-    ax=80,  # Direção da seta da direita para a barra
+    ax=0,  # Direção da seta da direita para a barra
     ay=-5,  # Direção da seta para cima, atingindo o topo da barra
     yref="y2"  # Posiciona no eixo y secundário
 )
@@ -472,7 +512,7 @@ fig_volatilidade.add_annotation(
     font=dict(color=brand_colors['VERDE_DETALHES']),
     xshift=0,  # Deslocamento horizontal para a esquerda
     yshift=-10,  # Ajusta para aparecer abaixo da barra
-    ax=-80,  # Direção da seta da esquerda para a barra
+    ax=-0,  # Direção da seta da esquerda para a barra
     ay=5,  # Direção da seta para baixo, atingindo o topo da barra
     yref="y2"  # Posiciona no eixo y secundário
 )
@@ -484,7 +524,13 @@ fig_volatilidade.update_layout(
 )
 
 
-
+fig_volatilidade.update_layout(
+    xaxis=dict(
+        tickformat="%Y-%m-%d",
+        nticks=28,
+        tickangle=-45
+    )
+    )
 
 # Logo centralizado no gráfico
 fig_volatilidade.add_layout_image(
@@ -508,15 +554,41 @@ if ativo_selecionado in direcoes_mercado:
     
     # Se o ativo selecionado for XB1 ou UC1, exibe a calculadora de risco ao lado
     if ativo_selecionado in ['XB1', 'UC1']:
-        col1, col2 = st.columns([8, 3])
+        col1, col2, col3 = st.columns([3, 8, 3])
+        
+        
+        with col1:
+            # Criar DataFrame com Data, Preço e Variação (%)
+            df_visualizacao = df_filtrado[['Preço']].copy()
+            df_visualizacao['Data'] = df_visualizacao.index.date  # Exibir apenas a data sem o horário
+            df_visualizacao['Variação (%)'] = df_visualizacao['Preço'].pct_change() * 100
+            df_visualizacao = df_visualizacao[['Data', 'Preço', 'Variação (%)']]  # Seleciona as colunas necessárias
+
+            # Ordenar o DataFrame por data em ordem decrescente
+            df_visualizacao = df_visualizacao.sort_index(ascending=False).head(14)  # Limita a 14 linhas mais recentes
+
+            # Formatar a coluna Preço com duas casas decimais
+            df_visualizacao['Preço'] = df_visualizacao['Preço'].map("{:.2f}".format)
+
+            # Aplicar o gradiente de cores em toda a linha, baseado na coluna "Variação (%)"
+            def color_row(row):
+                norm_val = (row['Variação (%)'] - df_visualizacao['Variação (%)'].min()) / (df_visualizacao['Variação (%)'].max() - df_visualizacao['Variação (%)'].min())
+                color = f'rgba(49, 226, 177, {norm_val})' if row['Variação (%)'] >= 0 else f'rgba(31, 71, 65, {norm_val})'
+                return [f'background-color: {color}; color: white; text-align: right;' for _ in row]
+
+            styled_df = df_visualizacao.style.apply(color_row, axis=1).background_gradient(subset=['Variação (%)'], cmap="Greens")
+
+            # Exibir o DataFrame estilizado no Streamlit
+            st.dataframe(styled_df, height=400)
 
         # Exibição do gráfico na coluna 1
-        with col1:
+        with col2:
+
             st.plotly_chart(fig_volatilidade, use_container_width=True)
  
 
         # Calculadora de risco na coluna 2
-        with col2:
+        with col3:
             st.title('Calculadora de Risco')
             ultimo_preco = df['Preço'].iloc[-1]
             
@@ -524,16 +596,32 @@ if ativo_selecionado in direcoes_mercado:
             if ativo_selecionado == 'XB1':
                 contrato_tipo = st.radio("Tipo de Contrato", ["Cheio", "Mini"])
                 # Ajuste no cálculo conforme a descrição
+                col3, col4 = st.columns([2, 2])
+                
                 valor_por_contrato = 25 * (ultimo_preco * 0.2) if contrato_tipo == "Cheio" else ultimo_preco * 0.2
-                st.write(f"Valor por Contrato ({contrato_tipo}): {formatar_moeda(valor_por_contrato)}")
+                valor_margem = 50000 if contrato_tipo == "Cheio" else 2000
+                alavancagem_indice = valor_por_contrato/valor_margem
+                
+                with col3:
+                    st.write(f"Valor por Contrato ({contrato_tipo}): {formatar_moeda(valor_por_contrato)}  |  Alav. {alavancagem_indice:.2}x")
+                with col4:
+                    st.write(f"Margem por Contrato ({contrato_tipo}): {formatar_moeda(valor_margem)}")
 
             # Calculadora específica para UC1
             if ativo_selecionado == 'UC1':
                 contrato_tipo = st.radio("Tipo de Contrato", ["Cheio", "Mini"])
                 # Definir o valor por contrato com base no tipo
+                
                 valor_por_contrato = ultimo_preco * 50 if contrato_tipo == "Cheio" else ultimo_preco * 10
-                st.write(f"Valor por Contrato ({contrato_tipo}): {formatar_moeda(valor_por_contrato)}")
-
+                valor_margem = 250000 if contrato_tipo == "Cheio" else 10000
+                alavancagem_dolar = valor_por_contrato/valor_margem                
+                col3, col4 = st.columns([2, 2])
+                
+                with col3:
+                    st.write(f"Valor por Contrato ({contrato_tipo}): {formatar_moeda(valor_por_contrato)}  |  Alav. {alavancagem_dolar:.2f}x")
+                with col4:
+                    st.write(f"Margem por Contrato ({contrato_tipo}): {formatar_moeda(valor_margem)}")
+                
             # Entrada do número de contratos e cálculo do total da posição
             num_contratos = st.number_input("Quantidade de Contratos", min_value=1, value=1, step=1)
             total_posicao = num_contratos * valor_por_contrato
@@ -557,15 +645,37 @@ if ativo_selecionado in direcoes_mercado:
             # Exibir a tabela com estilo
             st.table(df_desvio.style.applymap(estilo_barras, subset=["Variação Líquida (+)", "Variação Líquida (-)"]))
     else:
-        # Exibe o gráfico completo para ativos sem calculadora de risco
-        st.plotly_chart(fig_volatilidade, use_container_width=True)
+        
+        
+        col1, col2 = st.columns([3, 8])
+        
+        
+        with col1:
+            # Criar DataFrame com Data, Preço e Variação (%)
+            df_visualizacao = df_filtrado[['Preço']].copy()
+            df_visualizacao['Variação (%)'] = df_visualizacao['Preço'].pct_change() * 100
+            df_visualizacao = df_visualizacao[['Preço', 'Variação (%)']].tail(14)  # Limita a 14 linhas
+            # Função para estilizar a coluna de Variação (%)
+            def style_variacao(val):
+                norm_val = (val - df_visualizacao['Variação (%)'].min()) / (df_visualizacao['Variação (%)'].max() - df_visualizacao['Variação (%)'].min())
+                color = f'linear-gradient(90deg, {brand_colors["VERDE_TEXTO"]} {norm_val*100}%, {brand_colors["VERDE_DETALHES"]} {(1 - norm_val)*100}%);'
+                return f'background: {color}; color: white; text-align: right;'
+
+                styled_df = df_visualizacao.style.applymap(apply_gradient, subset=['Variação (%)'])
+
+            # Aplicar o estilo ao DataFrame e exibir no Streamlit
+            st.dataframe(df_visualizacao.style.applymap(style_variacao), height=400)        
+        
+        with col2:
+            st.plotly_chart(fig_volatilidade, use_container_width=True) 
+            
+            
     st.divider()
 
 else:
     # Exibe o gráfico mesmo sem predição disponível
     st.plotly_chart(fig_volatilidade, use_container_width=True)
     st.divider()
-
     
 
 # Ajuste de estilo para transparência do fundo e espaçamento
