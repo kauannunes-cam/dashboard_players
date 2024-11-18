@@ -658,7 +658,7 @@ if ativo_selecionado in direcoes_mercado:
             # Criar DataFrame com Data, Preço e Variação (%)
             df_visualizacao = df_filtrado[['Preço']].copy()
             df_visualizacao['Variação (%)'] = df_visualizacao['Preço'].pct_change() * 100
-            df_visualizacao = df_visualizacao[['Preço', 'Variação (%)']].tail(14)  # Limita a 14 linhas
+            df_visualizacao = df_visualizacao[['Preço', 'Variação (%)']]  # Limita a 14 linhas
             # Função para estilizar a coluna de Variação (%)
             def style_variacao(val):
                 norm_val = (val - df_visualizacao['Variação (%)'].min()) / (df_visualizacao['Variação (%)'].max() - df_visualizacao['Variação (%)'].min())
