@@ -208,7 +208,7 @@ direcoes_mercado = get_direcao_projetada(ativos_selected)
 
 st.divider()
 
-st.write("Total da Posição kkkkkkkkkkkk:")
+#st.write("Total da Posição kkkkkkkkkkkk:")
 
 st.divider()
 
