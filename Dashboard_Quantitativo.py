@@ -556,15 +556,20 @@ if ativo_selecionado in direcoes_mercado:
         
         
         with col1:
-            # Criar DataFrame com Data, Preço e Variação (%)
             df_visualizacao = df_filtrado[['Preço']].copy()
             df_visualizacao['Data'] = df_visualizacao.index.date  # Exibir apenas a data sem o horário
             df_visualizacao['Variação (%)'] = df_visualizacao['Preço'].pct_change() * 100
-            df_visualizacao = df_visualizacao[['Data', 'Preço', 'Variação (%)']]  # Seleciona as colunas necessárias
+            
+            # Calcular a sequência de pregões positivos ou negativos
+            df_visualizacao['Sequência'] = (df_visualizacao['Variação (%)']
+                                            .apply(lambda x: 1 if x > 0 else -1)
+                                            .groupby((df_visualizacao['Variação (%)'] > 0) != (df_visualizacao['Variação (%)'] > 0).shift())
+                                            .cumsum())
+            df_visualizacao['Sequência'] = df_visualizacao['Sequência'].apply(lambda x: abs(x) if x > 0 else -abs(x))
 
-            # Ordenar o DataFrame por data em ordem decrescente
-            df_visualizacao = df_visualizacao.sort_index(ascending=False).head(14)  # Limita a 14 linhas mais recentes
-
+            # Seleciona as colunas necessárias e ordena a DataFrame por data em ordem decrescente
+            df_visualizacao = df_visualizacao[['Data', 'Preço', 'Variação (%)', 'Sequência']].sort_index(ascending=False)
+            
             # Formatar a coluna Preço com duas casas decimais
             df_visualizacao['Preço'] = df_visualizacao['Preço'].map("{:.2f}".format)
 
@@ -576,8 +581,9 @@ if ativo_selecionado in direcoes_mercado:
 
             styled_df = df_visualizacao.style.apply(color_row, axis=1).background_gradient(subset=['Variação (%)'], cmap="Greens")
 
-            # Exibir o DataFrame estilizado no Streamlit
-            st.dataframe(styled_df, height=400)
+            # Exibir o DataFrame estilizado no Streamlit com scroll
+            st.dataframe(styled_df, height=800, use_container_width=True)
+
 
         # Exibição do gráfico na coluna 1
         with col2:
