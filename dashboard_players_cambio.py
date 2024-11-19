@@ -39,6 +39,30 @@ brand_colors = {
 colors = [brand_colors["VERDE_DETALHES"], "#3498DB", "#F1C40F", "#E74C3C", "#8E44AD"]
 
 
+st.set_page_config(layout="wide")
+
+
+# Configuração de estilo para centralizar os elementos
+st.markdown("""
+    <style>
+        .centered {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .block-container {
+            max-width: 100%;
+            padding: 1rem 2rem;
+            margin: 0 auto;
+        }
+        .custom-header {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
 # Caminho para os arquivos Excel
 file_path_saldos = 'History dollar B3.xlsx'
 file_path_uc1 = 'History Cot.xlsx'
@@ -105,14 +129,20 @@ for sheet_name, data in excel_data.items():
 for player, dfs in all_dataframes.items():
     combined_df = pd.concat(dfs, axis=1)
     combined_df['saldo'] = combined_df.sum(axis=1)
-    combined_df['var_liq_diaria'] = combined_df['saldo'].diff()
+    combined_df['var_liq'] = combined_df['saldo'].diff()
+    combined_df['var_%'] = combined_df['saldo'].pct_change() * 100  # Calcula a variação percentual diária
     globals()[f'df_{player}'] = combined_df
 
+# Função para formatar números no estilo brasileiro
+def formatar_moeda(valor):
+    return f'R$ {valor:,.2f}'.replace(',', 'X').replace('.', ',').replace('X', '.')
+
+
 # Configurações de layout do dashboard com Streamlit
-st.set_page_config(layout="wide")
+
 
 # Configuração do título com filtro de data ao lado
-col1, col2 = st.columns([2, 2])
+col1, col2 = st.columns([2,2])
 with col1:
     st.title("Análise de Posições dos Players")
 
@@ -123,6 +153,7 @@ with col2:
     # Filtro de data inicial
     with date_col1:
         start_date = st.date_input("Data Inicial", value=data_inicial, min_value=data_minima, max_value=hoje)
+        visualizar_tabela = st.checkbox("Visualizar Tabelas", key="Visualizar")
 
     # Filtro de data final e checkbox para definir "Hoje"
     with date_col2:
@@ -131,7 +162,6 @@ with col2:
         set_end_today = st.checkbox("Hoje", key="end_today")
         if set_end_today:
             end_date = hoje  # Redefine a data final para hoje se o checkbox estiver marcado
-
 
         
 st.divider()
@@ -145,7 +175,7 @@ def load_image_as_base64(image_path):
     return base64.b64encode(buffered.getvalue()).decode()
 
 # Caminho da logo (ajuste conforme necessário)
-logo_path = "./logo_transparente.png"
+logo_path = "logo_transparente.png"
 
 
 # Carregar logo como base64 para usar em marca d'água
@@ -181,7 +211,7 @@ def plot_combined_chart(player_df, uc1_df, player_name):
     ))
 
     # Gráfico de barras de composição de contratos
-    for idx, column in enumerate(recent_df.columns[:-2]):  # Exclui saldo e variação
+    for idx, column in enumerate(recent_df.columns[:-3]):  # Exclui saldo e variação
         fig.add_trace(go.Bar(
             x=recent_df.index,
             y=recent_df[column],
@@ -250,29 +280,40 @@ def plot_combined_chart(player_df, uc1_df, player_name):
 
 
 # Primeira linha - Estrangeiros e Fundo Local
-col1, col2 = st.columns(2)
+col1, col2 = st.columns([1, 1], gap="large")
 with col1:
     st.subheader("Estrangeiros")
     st.plotly_chart(plot_combined_chart(df_estrangeiro, uc1_df, "Estrangeiro"), use_container_width=True)
-
+    if visualizar_tabela:
+        st.dataframe(df_estrangeiro.tail())
 with col2:
     st.subheader("Fundo Local")
     st.plotly_chart(plot_combined_chart(df_flocal, uc1_df, "Fundo Local"), use_container_width=True)
+    if visualizar_tabela:
+        st.dataframe(df_flocal.tail())
+    st.markdown('</div>', unsafe_allow_html=True)
+
 
 # Segunda linha - Bancos, Pessoas Jurídicas e Pessoas Físicas
-col1, col2, col3 = st.columns(3)
+col1, col2, col3 = st.columns([7, 6, 5], gap="large")
 with col1:
     st.subheader("Bancos")
     st.plotly_chart(plot_combined_chart(df_bancos, uc1_df, "Bancos"), use_container_width=True)
-
+    if visualizar_tabela:
+        st.dataframe(df_bancos.tail())
+    st.markdown('</div>', unsafe_allow_html=True)
 with col2:
     st.subheader("Pessoas Jurídicas")
     st.plotly_chart(plot_combined_chart(df_pj, uc1_df, "Pessoas Jurídicas"), use_container_width=True)
-
+    if visualizar_tabela:
+        st.dataframe(df_pj.tail())
+    st.markdown('</div>', unsafe_allow_html=True)
 with col3:
     st.subheader("Pessoas Físicas")
     st.plotly_chart(plot_combined_chart(df_pf, uc1_df, "Pessoas Físicas"), use_container_width=True)
-
+    if visualizar_tabela:
+        st.dataframe(df_pf.tail())
+    st.markdown('</div>', unsafe_allow_html=True)
 # Ajuste de estilo para transparência do fundo e espaçamento
 st.markdown(f"""
     <style>
@@ -289,4 +330,5 @@ st.markdown(f"""
 
 # Primeira linha - Estrangeiros e Fundo Local
 col1, col2, col3, col4, col5 = st.columns(5)
+
 
