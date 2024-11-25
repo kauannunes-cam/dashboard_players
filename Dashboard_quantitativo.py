@@ -36,8 +36,9 @@ def load_image_as_base64(image_path):
     return base64.b64encode(buffered.getvalue()).decode()
 
 # Caminho da logo (ajuste conforme necessário)
-logo_path = "./logo_transparente.png"
+logo_path = "logo_transparente.png"
 
+file_path = 'History Cot.xlsx'
 
 # Carregar logo como base64 para usar em marca d'água
 img_str = load_image_as_base64(logo_path)
@@ -47,7 +48,7 @@ st.set_page_config(layout="wide")
 
 @st.cache_data
 def carregar_dados():
-    xls = pd.ExcelFile("C://Users//Kauan//OneDrive - Cambirela//3 - Cambirela Tabelas Excel//History Cot.xlsx")
+    xls = pd.ExcelFile(file_path)
     ativos = {}
     for sheet_name in xls.sheet_names:
         df = pd.read_excel(xls, sheet_name=sheet_name, skiprows=2)
