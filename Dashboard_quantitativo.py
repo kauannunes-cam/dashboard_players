@@ -8,6 +8,9 @@ from PIL import Image
 import os
 import numpy as np
 from datetime import datetime, timedelta
+from sklearn.preprocessing import MinMaxScaler
+from keras.models import Sequential
+from keras.layers import Dense, LSTM
 
 nivel_confianca = 0.975
 z_95 = 1.96
@@ -28,6 +31,13 @@ brand_colors = {
     "PRETO": "#1B1B1B"
 }
 
+
+custom_colorscale = [
+    [0, brand_colors["CINZA"]],
+    [0.5, brand_colors["CREME"]],
+    [1, brand_colors["VERDE_PRINCIPAL"]],
+]
+
 # Função para carregar a imagem e converter para base64
 def load_image_as_base64(image_path):
     image = Image.open(image_path)
@@ -38,7 +48,6 @@ def load_image_as_base64(image_path):
 # Caminho da logo (ajuste conforme necessário)
 logo_path = "logo_transparente.png"
 
-file_path = 'History Cot.xlsx'
 
 # Carregar logo como base64 para usar em marca d'água
 img_str = load_image_as_base64(logo_path)
@@ -48,7 +57,7 @@ st.set_page_config(layout="wide")
 
 @st.cache_data
 def carregar_dados():
-    xls = pd.ExcelFile(file_path)
+    xls = pd.ExcelFile("History Cot.xlsx")
     ativos = {}
     for sheet_name in xls.sheet_names:
         df = pd.read_excel(xls, sheet_name=sheet_name, skiprows=2)
@@ -66,6 +75,124 @@ ativos = carregar_dados()
 selected_assets = ['BBDXY', 'Bitcoin', 'CL1', 'CO1', 'DM1', 'ES1', 'NQ1', 'ODF26', 'ODF27', 'ODN26', 
                    'T-02', 'T-10', 'UC1', 'UC2', 'USDMXN', 'VIX', 'XAU', 'XB1', 'BCOMGR', 'CDS Brazil']
 ativos_selected = {key: ativos[key] for key in selected_assets if key in ativos}
+
+
+ativos_combined = pd.concat(ativos_selected.values(), axis=1, keys=ativos_selected.keys())
+ativos_combined = ativos_combined.tail(100)
+ativos_combined.columns = ativos_combined.columns.get_level_values(0)
+
+# Calcula a matriz de correlação
+correlation_matrix = ativos_combined.corr()
+
+grid_corrl = go.Figure(
+    data=go.Heatmap(
+        z=correlation_matrix.values,
+        x=correlation_matrix.columns,
+        y=correlation_matrix.columns,
+        colorscale=custom_colorscale,
+        colorbar=dict(title="Correlação"),
+        zmin=-1,
+        zmax=1
+    )
+)
+
+# Adicionar anotações para valores de correlação maiores que 0.65
+for i in range(len(correlation_matrix.columns)):
+    for j in range(len(correlation_matrix.columns)):
+        correlation_value = correlation_matrix.values[i, j]
+        if correlation_value > 0.65:
+            grid_corrl.add_annotation(
+                x=correlation_matrix.columns[i],
+                y=correlation_matrix.columns[j],
+                text=f"{correlation_value:.2f}",
+                showarrow=False,
+                font=dict(color=brand_colors["CREME"], size=12)
+            )
+
+# Configurações de layout para o heatmap
+grid_corrl.update_layout(
+    title="Matriz de Correlação dos Ativos",
+    xaxis=dict(tickangle=-45),
+    autosize=True,
+    width=1000,
+    height=600,
+    margin=dict(l=50, r=50, t=100, b=100),
+)
+
+
+# Lista de ativos
+ativos_predicao = ['BBDXY', 'Bitcoin', 'CL1', 'CO1', 'DM1', 'ES1', 'NQ1', 'ODF26', 'ODF27', 'ODN26', 
+                   'T-02', 'T-10', 'UC1', 'UC2', 'USDMXN', 'VIX', 'XAU', 'XB1', 'BCOMGR', 'CDS Brazil']
+
+
+# Função para treinar o modelo e fazer previsões
+@st.cache_data
+def treinar_e_prever(dados_acao):
+    # Garantir que a coluna 'Preço' está presente no DataFrame
+    if 'Preço' not in dados_acao.columns:
+        raise KeyError("O DataFrame fornecido não contém uma coluna 'Preço'.")
+        
+    # Preparação dos dados
+    dados_acao = dados_acao[['Preço']].tail(1000)
+    cotacao = dados_acao['Preço'].to_numpy().reshape(-1, 1)
+    tamanho_dados_treinamento = int(len(cotacao) * 0.8)
+
+    escalador = MinMaxScaler(feature_range=(0, 1))
+    dados_entre_0_e_1_treinamento = escalador.fit_transform(cotacao[:tamanho_dados_treinamento])
+    dados_entre_0_e_1_teste = escalador.transform(cotacao[tamanho_dados_treinamento:])
+    dados_entre_0_e_1 = np.concatenate([dados_entre_0_e_1_treinamento, dados_entre_0_e_1_teste]).reshape(-1, 1)
+
+    # Preparação dos dados para treinamento
+    treinamento_x, treinamento_y = [], []
+    for i in range(60, tamanho_dados_treinamento):
+        treinamento_x.append(dados_entre_0_e_1[i - 60:i, 0])
+        treinamento_y.append(dados_entre_0_e_1[i, 0])
+    
+    treinamento_x, treinamento_y = np.array(treinamento_x), np.array(treinamento_y)
+    treinamento_x = treinamento_x.reshape(treinamento_x.shape[0], treinamento_x.shape[1], 1)
+
+    # Criação e treinamento do modelo LSTM
+    modelo = Sequential([
+        LSTM(50, return_sequences=True, input_shape=(treinamento_x.shape[1], 1)),
+        LSTM(50, return_sequences=False),
+        Dense(25),
+        Dense(1)
+    ])
+    modelo.compile(optimizer="adam", loss="mean_squared_error")
+    modelo.fit(treinamento_x, treinamento_y, batch_size=1, epochs=1)
+
+    # Preparação dos dados para teste e predição
+    dados_teste = dados_entre_0_e_1[tamanho_dados_treinamento - 60:]
+    teste_x = np.array([dados_teste[i - 60:i, 0] for i in range(60, len(dados_teste))])
+    teste_x = teste_x.reshape(teste_x.shape[0], teste_x.shape[1], 1)
+
+    predicoes = modelo.predict(teste_x)
+    predicoes = escalador.inverse_transform(predicoes)
+
+    return predicoes, dados_acao['Preço'].iloc[tamanho_dados_treinamento:].values
+
+# Função para obter a direção projetada
+@st.cache_data
+def get_direcao_projetada(ativos):
+    direcoes = {}
+    for ativo, dados_acao in ativos.items():
+        if ativo in ativos_predicao:
+            predicoes, valores_reais = treinar_e_prever(dados_acao)
+            if len(predicoes) > 0:
+                valor_projetado = predicoes[-1][0]
+                ultimo_ajuste = dados_acao['Preço'].iloc[-1]
+                var_perc_projetado = (valor_projetado - ultimo_ajuste) / ultimo_ajuste * 100
+                direcao_mercado = "Alta" if var_perc_projetado > 0 else "Baixa"
+            else:
+                direcao_mercado = "Predição indisponível"
+            direcoes[ativo] = direcao_mercado
+    return direcoes
+
+# Obter direções projetadas para cada ativo disponível
+direcoes_mercado = get_direcao_projetada(ativos_selected)
+
+
+
 
 
 
@@ -234,8 +361,7 @@ if exibir_medias_moveis:
 
 
 
-# Layout da aplicação
-st.title("Monitoramento de Ativos - Cambirela")
+
 
 
 with col1:
@@ -312,7 +438,7 @@ with col2:
         x=dias_var_positiva,
         y=df_ativo_filtrado.loc[dias_var_positiva, 'Preço'],
         mode='markers',
-        name='Var. > +VaR%',
+        name='Variação Maior VaR%',
         marker=dict(color=brand_colors["CREME"], size=16)
     ))
 
@@ -321,7 +447,7 @@ with col2:
         x=dias_var_negativa,
         y=df_ativo_filtrado.loc[dias_var_negativa, 'Preço'],
         mode='markers',
-        name='Var. < -VaR%',
+        name='Variação Menor VaR%',
         marker=dict(color=brand_colors["CINZA"], size=16)
     ))
 
@@ -437,26 +563,134 @@ with col2:
         height=800   # Altura do gráfico
     )
 
-
+    # Exibe o título de predição apenas para ativos da lista `ativos_predicao`
+    if ativo_selecionado in ativos_predicao and ativo_selecionado in direcoes_mercado:
+        direcao_pregao = direcoes_mercado[ativo_selecionado]
+        st.title(f"A predição para o ativo {ativo_selecionado} é: {direcao_pregao}")
+        st.divider()
+        
+        
     # Exibir o gráfico
     st.plotly_chart(fig, use_container_width=True)
     
-    st.divider()
+st.divider()
 
-    if ativo_selecionado:
-        ativo_df = ativos_selected[ativo_selecionado]
-        ativo_df_processado = processar_dados_com_setas_coloridas(ativo_df)
-        
-        # Adiciona a coluna "Preço em R$" para Bitcoin
-        if ativo_selecionado == 'Bitcoin' and 'UC1' in ativos_selected:
-            uc1_df = ativos_selected['UC1']
-            uc1_df = uc1_df.sort_index()  # Ordena UC1 por Data para consistência
-            ativo_df_processado = adicionar_preco_em_real(ativo_df_processado, uc1_df)
+if ativo_selecionado:
+    ativo_df = ativos_selected[ativo_selecionado]
+    ativo_df_processado = processar_dados_com_setas_coloridas(ativo_df)
+    
+    # Adiciona a coluna "Preço em R$" para Bitcoin
+    if ativo_selecionado == 'Bitcoin' and 'UC1' in ativos_selected:
+        uc1_df = ativos_selected['UC1']
+        uc1_df = uc1_df.sort_index()  # Ordena UC1 por Data para consistência
+        ativo_df_processado = adicionar_preco_em_real(ativo_df_processado, uc1_df)
 
-        # Estiliza a tabela
-        styled_df = estilizar_tabela(ativo_df_processado)
-        st.write(f"Análise do Ativo: {ativo_selecionado}")
-        st.dataframe(styled_df, use_container_width=True)
+    # Estiliza a tabela
+    styled_df = estilizar_tabela(ativo_df_processado)
+    st.write(f"Análise do Ativo: {ativo_selecionado}")
+    st.dataframe(styled_df, use_container_width=True)
+
+
+st.divider()
+
+
+
+
+scaler = MinMaxScaler()
+ativos_normalizados = {}
+for ativo, df in ativos.items():
+    df_normalizado = pd.DataFrame(scaler.fit_transform(df[['Preço']]), columns=['Preço'], index=df.index)
+    ativos_normalizados[ativo] = df_normalizado
+
+# Seleção de ativos para o gráfico comparativo
+selected_assets = list(ativos_normalizados.keys())
+
+
+# Layout da aplicação
+st.title("Correlação")
+col1, col2 = st.columns([2, 2])
+
+with col1:
+    # Exibir a figura interativa no Streamlit
+    st.plotly_chart(grid_corrl, use_container_width=True)
+    
+
+with col2:
+    col1, col2 = st.columns([2, 2])
+
+    with col1:
+        # Exibir a figura interativa no Streamlit com pré-seleção de "UC1" para Ativo 1
+        ativo_1 = st.selectbox("Selecione o Ativo 1", options=selected_assets, index=selected_assets.index("UC1"))
+
+    with col2:
+        # Seleção de Ativo 2 com pré-seleção de "XB1"
+        ativo_2 = st.selectbox("Selecione o Ativo 2", options=selected_assets, index=selected_assets.index("XB1"))
+
+    # Filtragem dos dados para os últimos 180 dias
+    df_ativo_1 = ativos_normalizados[ativo_1].tail(180)
+    df_ativo_2 = ativos_normalizados[ativo_2].tail(180)
+
+    # Calcular o histórico de correlação para os últimos 60 dias
+    df_corr = df_ativo_1['Preço'].rolling(window=5).corr(df_ativo_2['Preço'])
+
+    # Configuração do gráfico comparativo
+    fig_corrl = go.Figure()
+
+    # Definir cores RGBA para preenchimento com transparência
+    fillcolor_positive = "rgba(49, 226, 177, 0.1)"  # VERDE_DETALHES com 50% de opacidade
+    fillcolor_negative = "rgba(31, 71, 65, 0.2)"    # VERDE_TEXTO com 50% de opacidade
+
+    # Adicionar gráfico de montanha para a correlação com transparência configurada diretamente no fillcolor
+    fig_corrl.add_trace(go.Scatter(
+        x=df_corr.index,
+        y=df_corr,
+        fill='tozeroy',
+        mode='none',
+        name="Correlação",
+        fillcolor=fillcolor_positive if df_corr.iloc[-1] > 0 else fillcolor_negative,
+        yaxis="y2"
+    ))
+    
+    # Linha para o ativo 1
+    fig_corrl.add_trace(go.Scatter(
+        x=df_ativo_1.index, y=df_ativo_1['Preço'],
+        mode='lines', name=ativo_1,
+        line=dict(color=brand_colors['VERDE_DETALHES'])
+    ))
+
+    # Linha para o ativo 2
+    fig_corrl.add_trace(go.Scatter(
+        x=df_ativo_2.index, y=df_ativo_2['Preço'],
+        mode='lines', name=ativo_2,
+        line=dict(color=brand_colors['VERDE_TEXTO'])
+    ))
+
+
+    # Configurações de layout do gráfico
+    fig_corrl.update_layout(
+        xaxis=dict(
+            tickformat="%Y-%m-%d",
+            nticks=28,
+            tickangle=-45
+        ),
+        yaxis=dict(title="Preço Normalizado", showgrid=False, side="right"),
+        yaxis2=dict(
+            title="Correlação",
+            overlaying="y",
+            side="left",
+            showgrid=False,
+            range=[-1, 1]  # Limita o eixo da correlação entre -1 e 1
+        ),
+        plot_bgcolor="rgba(0,0,0,0)",  # Fundo transparente
+        width=1000,
+        height=500,
+        margin=dict(l=20, r=20, t=50, b=50)
+    )
+
+    # Exibir o gráfico no Streamlit
+    st.plotly_chart(fig_corrl, use_container_width=True)
+st.divider()
+    
 # Observações e insights (opcional)
-st.write("### Insights")
-st.text("Inclua aqui observações sobre o comportamento do ativo selecionado.")
+#st.write("### Insights")
+#st.text("Inclua aqui observações sobre o comportamento do ativo selecionado.")
