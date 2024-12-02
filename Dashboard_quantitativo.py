@@ -359,29 +359,54 @@ if exibir_medias_moveis:
     df_ativo_filtrado['Media_100'] = df_ativo['Preço'].rolling(window=100).mean()
     df_ativo_filtrado['Media_200'] = df_ativo['Preço'].rolling(window=200).mean()
 
+    # Calcular os spreads entre o preço e as médias móveis
+    df_ativo_filtrado['Spread_MM100'] = df_ativo_filtrado['Preço'] - df_ativo_filtrado['Media_100']
+    df_ativo_filtrado['Spread_MM200'] = df_ativo_filtrado['Preço'] - df_ativo_filtrado['Media_200']
+    
+    df_ativo_ultimo_spread_mm100 = df_ativo_filtrado['Spread_MM100'][-1]
+    df_ativo_ultimo_spread_mm200 = df_ativo_filtrado['Spread_MM200'][-1]
+
+    # Calcular o desvio padrão dos spreads
+    desvio_spread_100 = df_ativo_filtrado['Spread_MM100'].std()
+    desvio_spread_200 = df_ativo_filtrado['Spread_MM200'].std()
+
+    # Limites de 95% de confiança para os spreads
+    limite_inferior_100 = df_ativo_filtrado['Spread_MM100'].mean() - z_95 * desvio_spread_100
+    limite_superior_100 = df_ativo_filtrado['Spread_MM100'].mean() + z_95 * desvio_spread_100
+
+    limite_inferior_200 = df_ativo_filtrado['Spread_MM200'].mean() - z_95 * desvio_spread_200
+    limite_superior_200 = df_ativo_filtrado['Spread_MM200'].mean() + z_95 * desvio_spread_200
+
+    # Filtrar os maiores valores registrados dos spreads
+    maiores_spreads_100 = df_ativo_filtrado[df_ativo_filtrado['Spread_MM100'] > limite_superior_100]
+    maiores_spreads_200 = df_ativo_filtrado[df_ativo_filtrado['Spread_MM200'] > limite_superior_200]
 
 
 
 
 
 with col1:
-    
     col3, col4 = st.columns([5, 5])
-    
+
     with col3:
         st.metric("Último Ajuste", f"{preco_atual:,.3f}")  
         st.metric("Volatilidade (%)", f"{volatilidade_atual:.3f}%")
         st.metric("Var % Base Filtrada", f"{variacao_base_filtrada:.2f}%")
-        st.metric("Máx. Seq. Negativa", f"{max_seq_negativa} dias")  # Nova métrica
+        st.metric("Máx. Seq. Negativa", f"{max_seq_negativa} dias")
         st.metric("Mínima do Período", f"{minimo:,.3f}")
+        if exibir_medias_moveis:
+            st.metric("Spread MM100", f"{df_ativo_ultimo_spread_mm100:.3f}")
+            st.metric("Máx. Spread MM100 (VaR 95%)", f"{limite_superior_100:.3f}")
 
     with col4:   
         st.metric("Variação do Dia (%)", f"{variacao_dia:.2f}%")
         st.metric("Value at Risk (%)", f"{var_95_percentual:,.3f}%")
         st.metric("Var % Mensal", f"{variacao_mensal:.2f}%")
-        st.metric("Máx. Seq. Positiva", f"{max_seq_positiva} dias")  # Nova métrica
+        st.metric("Máx. Seq. Positiva", f"{max_seq_positiva} dias")
         st.metric("Máxima do Período", f"{maximo:,.3f}")
-
+        if exibir_medias_moveis:
+            st.metric("Spread MM200", f"{df_ativo_ultimo_spread_mm200:.3f}")
+            st.metric("Máx. Spread MM200 (VaR 95%)", f"{limite_superior_200:.3f}")
 
 with col2:
 
