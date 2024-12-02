@@ -375,7 +375,7 @@ for player_name, df in dfs_formatados.items():
                 """
                 <style>
                     .dataframe {
-                        width: 90%; /* Define largura da tabela como 90% */
+                        width: 100%; /* Define largura da tabela como 90% */
                     }
                     .dataframe tbody td {
                         text-align: center; /* Centraliza os valores dentro das células */
@@ -383,11 +383,11 @@ for player_name, df in dfs_formatados.items():
                     }
                     .dataframe thead th {
                         text-align: center; /* Centraliza os cabeçalhos */
-                        font-size: 12px; /* Define o tamanho da fonte para os cabeçalhos */
+                        font-size: 11px; /* Define o tamanho da fonte para os cabeçalhos */
                     }
                     .reportview-container .main .block-container {
-                        max-width: 1600px;
-                        padding: 1rem 2rem;
+                        max-width: 1400px;
+                        padding: 1rem 1rem;
                         background-color: rgba(0, 0, 0, 0);
                     }
                 </style>
