@@ -350,23 +350,23 @@ for player_name, df in dfs_variados.items():
 for player_name, df in dfs_formatados.items():
     st.subheader(player_name)
     st.plotly_chart(plot_combined_chart(dfs_variados[player_name], uc1_df, player_name), use_container_width=True)
-
-    col1, col2 = st.columns([1, 3])  # Define proporção das colunas
-
-    with col1:
-        st.write("")
-        st.markdown("### Selecione o período da tabela:")
-
-    with col2:
-        quantidade_dias = st.selectbox(
-            "",
-            options=[5, 10, 15, 30, 60, 90, 180, 360],  # Opções no dropdown
-            index=0,  # Valor padrão é o primeiro (5 dias)
-            key=f"{player_name}_dias"
-        )
+    st.divider()
 
     if visualizar_tabela:
         try:
+            col1, col2 = st.columns([1, 3])  # Define proporção das colunas
+
+            with col1:
+                st.write("")
+                st.markdown("### Selecione o período da tabela:")
+
+            with col2:
+                quantidade_dias = st.selectbox(
+                    "",
+                    options=[5, 10, 15, 30, 60, 90, 180, 360],  # Opções no dropdown
+                    index=0,  # Valor padrão é o primeiro (5 dias)
+                    key=f"{player_name}_dias"
+                )
             # Remove a primeira coluna (geralmente o índice resetado)
             #df = df.drop(columns=df.columns[0])  # `columns` especifica o nome ou índice da coluna
             
