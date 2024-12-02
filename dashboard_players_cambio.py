@@ -375,11 +375,11 @@ for player_name, df in dfs_formatados.items():
                 """
                 <style>
                     .dataframe {
-                        width: 100%; /* Define largura da tabela como 100% */
+                        width: 90%; /* Define largura da tabela como 90% */
                     }
                     .dataframe tbody td {
                         text-align: center; /* Centraliza os valores dentro das células */
-                        font-size: 12px; /* Define o tamanho da fonte para o corpo */
+                        font-size: 10px; /* Define o tamanho da fonte para o corpo */
                     }
                     .dataframe thead th {
                         text-align: center; /* Centraliza os cabeçalhos */
