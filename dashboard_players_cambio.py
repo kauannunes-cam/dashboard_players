@@ -354,7 +354,7 @@ for player_name, df in dfs_formatados.items():
 
     if visualizar_tabela:
         try:
-            col1, col2 = st.columns([1, 3])  # Define proporção das colunas
+            col1, col2 = st.columns([3, 5])  # Define proporção das colunas
 
             with col1:
                 st.write("")
@@ -383,10 +383,10 @@ for player_name, df in dfs_formatados.items():
                     }
                     .dataframe thead th {
                         text-align: center; /* Centraliza os cabeçalhos */
-                        font-size: 11px; /* Define o tamanho da fonte para os cabeçalhos */
+                        font-size: 10px; /* Define o tamanho da fonte para os cabeçalhos */
                     }
                     .reportview-container .main .block-container {
-                        max-width: 1400px;
+                        max-width: 1300px;
                         padding: 1rem 1rem;
                         background-color: rgba(0, 0, 0, 0);
                     }
