@@ -36,7 +36,18 @@ brand_colors = {
     "CINZA": "#969B91",
     "PRETO": "#1B1B1B"
 }
-colors = [brand_colors["VERDE_DETALHES"], "#3498DB", "#F1C40F", "#E74C3C", "#8E44AD"]
+
+
+
+# Definição das cores ajustadas para as barras
+colors = [
+    "#3498DB",  # DOLAR_CHEIO (Verde Detalhes)
+    "#F1C40F",  # DOLAR_MINI (Verde Principal)
+    "#E74C3C",  # DDI (Um tom contrastante, já em uso)
+    "#8E44AD"   # SWAP (Amarelo, já em uso e harmoniza)
+]
+
+
 
 
 st.set_page_config(layout="wide")
@@ -138,7 +149,6 @@ def formatar_moeda(valor):
     return f'R$ {valor:,.2f}'.replace(',', 'X').replace('.', ',').replace('X', '.')
 
 
-# Configurações de layout do dashboard com Streamlit
 
 
 # Configuração do título com filtro de data ao lado
@@ -175,7 +185,7 @@ def load_image_as_base64(image_path):
     return base64.b64encode(buffered.getvalue()).decode()
 
 # Caminho da logo (ajuste conforme necessário)
-logo_path = "logo_transparente.png"
+logo_path = "logo_transparente_cambirela.png"
 
 
 # Carregar logo como base64 para usar em marca d'água
@@ -185,8 +195,10 @@ img_str = load_image_as_base64(logo_path)
 def plot_combined_chart(player_df, uc1_df, player_name):
     fig = go.Figure()
 
+
+    player_df.index = pd.to_datetime(player_df.index)
     # Exibir apenas os últimos 60 dias no preview
-    recent_df = player_df[start_date:end_date]
+    recent_df = player_df.loc[(player_df.index >= pd.to_datetime(start_date)) & (player_df.index <= pd.to_datetime(end_date))]
 
     # Gráfico de linhas de saldo e UC1
     fig.add_trace(go.Scatter(
@@ -194,7 +206,7 @@ def plot_combined_chart(player_df, uc1_df, player_name):
         y=recent_df['saldo'],
         mode='lines',
         name=f"{player_name} Saldo",
-        line=dict(color=brand_colors["CREME"], shape='spline'),
+        line=dict(color="#76807d", shape='spline'),
         yaxis="y2",
         showlegend=True
     ))
@@ -205,21 +217,23 @@ def plot_combined_chart(player_df, uc1_df, player_name):
         y=uc1_df_filtered['Preço'],
         mode='lines',
         name='UC1',
-        line=dict(color=brand_colors["CINZA"], shape='spline'),
+        line=dict(color="#3DF2C1", shape='spline'),
         yaxis="y3",
         showlegend=True
     ))
 
-    # Gráfico de barras de composição de contratos
-    for idx, column in enumerate(recent_df.columns[:-3]):  # Exclui saldo e variação
-        fig.add_trace(go.Bar(
-            x=recent_df.index,
-            y=recent_df[column],
-            name=column,
-            marker=dict(color=colors[idx % len(colors)]),
-            yaxis="y1",
-            showlegend=True
-        ))
+    # Gráfico de barras de composição de contratos (somente ddi, swap, dolarmini, dolarcheio)
+    columns_to_plot = ['ddi', 'swap', 'dolarmini', 'dolarcheio']
+    for idx, column in enumerate(columns_to_plot):
+        if column in recent_df.columns:
+            fig.add_trace(go.Bar(
+                x=recent_df.index,
+                y=recent_df[column],
+                name=column,
+                marker=dict(color=colors[idx % len(colors)]),
+                yaxis="y1",
+                showlegend=True
+            ))
 
 
     # Configurações de layout e estilo com coloração dos textos dos eixos Y
@@ -246,7 +260,7 @@ def plot_combined_chart(player_df, uc1_df, player_name):
             position=0.5,
             showgrid=True,
             titlefont=dict(color=brand_colors["CINZA"]),  # Coloração para o eixo UC1
-            tickfont=dict(color=brand_colors["CINZA"])
+            tickfont=dict(color="#3DF2C1")
         ),
         barmode='stack',
         plot_bgcolor='rgba(0,0,0,0)',
@@ -268,67 +282,130 @@ def plot_combined_chart(player_df, uc1_df, player_name):
         dict(
             source=f'data:image/png;base64,{img_str}',
             xref="paper", yref="paper",
-            x=0.5, y=0.5,
-            sizex=0.9, sizey=0.9,
+            x=0.5, y=1.15,
+            sizex=0.2, sizey=0.2,
             xanchor="center", yanchor="middle",
-            opacity=0.4,
+            opacity=1,
             layer="below"
         )
     )
     return fig
 
 
-
-# Primeira linha - Estrangeiros e Fundo Local
-col1, col2 = st.columns([1, 1], gap="large")
-with col1:
-    st.subheader("Estrangeiros")
-    st.plotly_chart(plot_combined_chart(df_estrangeiro, uc1_df, "Estrangeiro"), use_container_width=True)
-    if visualizar_tabela:
-        st.dataframe(df_estrangeiro.tail())
-with col2:
-    st.subheader("Fundo Local")
-    st.plotly_chart(plot_combined_chart(df_flocal, uc1_df, "Fundo Local"), use_container_width=True)
-    if visualizar_tabela:
-        st.dataframe(df_flocal.tail())
-    st.markdown('</div>', unsafe_allow_html=True)
+def formatar_numero(valor): 
+    return f'U$${valor:,.2f}'.replace(',', 'X').replace('.', ',').replace('X', '.')
 
 
-# Segunda linha - Bancos, Pessoas Jurídicas e Pessoas Físicas
-col1, col2, col3 = st.columns([7, 6, 5], gap="large")
-with col1:
-    st.subheader("Bancos")
-    st.plotly_chart(plot_combined_chart(df_bancos, uc1_df, "Bancos"), use_container_width=True)
+def calcular_variacoes(df):
+    # Calcula a variação percentual diária para cada ativo
+    for ativo in ['dolarcheio', 'dolarmini', 'swap', 'ddi']:
+        if ativo in df.columns:
+            df[f'var_$_{ativo}'] = df[ativo].diff()
+            df[f'var_%_{ativo}'] = df[ativo].pct_change() * 100
+    # Calcula o saldo e variação percentual do saldo
+    df['var_liq_saldo'] = df['saldo'].diff()
+    df['var_%_saldo'] = df['saldo'].pct_change() * 100
+
+    # Reorganiza as colunas conforme solicitado
+    ordered_columns = []
+    for ativo in ['dolarcheio', 'var_$_dolarcheio', 'var_%_dolarcheio',
+                  'dolarmini', 'var_$_dolarmini', 'var_%_dolarmini',
+                  'swap', 'var_$_swap', 'var_%_swap',
+                  'ddi', 'var_$_ddi', 'var_%_ddi']:
+        if ativo in df.columns:
+            ordered_columns.append(ativo)
+    ordered_columns.extend(['saldo', 'var_liq_saldo', 'var_%_saldo'])
+    return df[ordered_columns]
+
+# Aplica a função para cada tabela (df_player)
+dfs = {'Estrangeiro': df_estrangeiro, 'Fundo Local': df_flocal, 'Bancos': df_bancos, 'Pessoas Jurídicas': df_pj, 'Pessoas Físicas': df_pf}
+dfs_variados = {player: calcular_variacoes(df) for player, df in dfs.items()}
+
+# Ajustar o DataFrame para incluir a data, ordenar, e formatar
+dfs_formatados = {}
+for player_name, df in dfs_variados.items():
+    # Inclui a data como coluna e verifica o nome
+    df = df.reset_index()
+
+    # Identifica dinamicamente o nome da coluna de data
+    date_column = df.columns[0]  # A primeira coluna será a data original (antes do reset_index)
+    df[date_column] = pd.to_datetime(df[date_column]).dt.date  # Formata como apenas data
+
+    # Ordena pela coluna de data
+    df.sort_values(by=date_column, ascending=False, inplace=True)
+
+    
+    # Formatar apenas as colunas numéricas
+    df_formatado = df.copy()
+    for col in df.columns[1:]:  # Ignora a coluna de índice ao formatar
+        if "var_%" in col:  # Verifica se a coluna é de variação percentual
+            df_formatado[col] = df[col].apply(lambda x: f"{x:.2f}%")
+        else:  # Formata normalmente as colunas numéricas
+            df_formatado[col] = df[col].apply(formatar_numero)
+    
+    dfs_formatados[player_name] = df_formatado
+
+
+
+for player_name, df in dfs_formatados.items():
+    st.subheader(player_name)
+    st.plotly_chart(plot_combined_chart(dfs_variados[player_name], uc1_df, player_name), use_container_width=True)
+
+    col1, col2 = st.columns([1, 3])  # Define proporção das colunas
+
+    with col1:
+        st.write("")
+        st.markdown("### Selecione o período da tabela:")
+
+    with col2:
+        quantidade_dias = st.selectbox(
+            "",
+            options=[5, 10, 15, 30, 60, 90, 180, 360],  # Opções no dropdown
+            index=0,  # Valor padrão é o primeiro (5 dias)
+            key=f"{player_name}_dias"
+        )
+
     if visualizar_tabela:
-        st.dataframe(df_bancos.tail())
-    st.markdown('</div>', unsafe_allow_html=True)
-with col2:
-    st.subheader("Pessoas Jurídicas")
-    st.plotly_chart(plot_combined_chart(df_pj, uc1_df, "Pessoas Jurídicas"), use_container_width=True)
-    if visualizar_tabela:
-        st.dataframe(df_pj.tail())
-    st.markdown('</div>', unsafe_allow_html=True)
-with col3:
-    st.subheader("Pessoas Físicas")
-    st.plotly_chart(plot_combined_chart(df_pf, uc1_df, "Pessoas Físicas"), use_container_width=True)
-    if visualizar_tabela:
-        st.dataframe(df_pf.tail())
-    st.markdown('</div>', unsafe_allow_html=True)
-# Ajuste de estilo para transparência do fundo e espaçamento
-st.markdown(f"""
-    <style>
-        .reportview-container .main .block-container{{
-            max-width: 1600px;
-            padding: 1rem 2rem;
-            background-color: rgba(0, 0, 0, 0);
-        }}
-        .css-1lcbmhc {{
-            margin-bottom: -10px;
-        }}
-    </style>
-""", unsafe_allow_html=True)
+        try:
+            # Remove a primeira coluna (geralmente o índice resetado)
+            #df = df.drop(columns=df.columns[0])  # `columns` especifica o nome ou índice da coluna
+            
+            # Adiciona CSS para centralizar o conteúdo da tabela
+            st.markdown(
+                """
+                <style>
+                    .dataframe {
+                        width: 100%; /* Define largura da tabela como 100% */
+                    }
+                    .dataframe tbody td {
+                        text-align: center; /* Centraliza os valores dentro das células */
+                        font-size: 12px; /* Define o tamanho da fonte para o corpo */
+                    }
+                    .dataframe thead th {
+                        text-align: center; /* Centraliza os cabeçalhos */
+                        font-size: 12px; /* Define o tamanho da fonte para os cabeçalhos */
+                    }
+                    .reportview-container .main .block-container {
+                        max-width: 1600px;
+                        padding: 1rem 2rem;
+                        background-color: rgba(0, 0, 0, 0);
+                    }
+                </style>
+                """,
+                unsafe_allow_html=True
+            )
+
+            # Renderiza a tabela como HTML com estilo centralizado
+            st.write(
+                df.head(quantidade_dias).to_html(index=False, justify='center', classes='dataframe'),  # Converte DataFrame para HTML
+                unsafe_allow_html=True
+            )
+            st.divider()
+        except Exception as e:
+            st.error(f"Erro ao renderizar tabela para {player_name}: {e}")
+
+
 
 # Primeira linha - Estrangeiros e Fundo Local
 col1, col2, col3, col4, col5 = st.columns(5)
-
 
