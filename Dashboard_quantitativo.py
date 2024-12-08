@@ -2,12 +2,12 @@ import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 import datetime
+from datetime import datetime, timedelta
 import base64
 from io import BytesIO
 from PIL import Image
 import os
 import numpy as np
-from datetime import datetime, timedelta
 from sklearn.preprocessing import MinMaxScaler
 from keras.models import Sequential
 from keras.layers import Dense, LSTM
@@ -408,6 +408,8 @@ with col1:
             st.metric("Spread MM200", f"{df_ativo_ultimo_spread_mm200:.3f}")
             st.metric("Máx. Spread MM200 (VaR 95%)", f"{limite_superior_200:.3f}")
 
+
+
 with col2:
 
     # Gráfico do ativo
@@ -614,6 +616,89 @@ if ativo_selecionado:
     styled_df = estilizar_tabela(ativo_df_processado)
     st.write(f"Análise do Ativo: {ativo_selecionado}")
     st.dataframe(styled_df, use_container_width=True)
+
+
+st.divider()
+
+st.title(f'Analise por Sazonalidade do {ativo_selecionado}')
+
+
+
+if ativo_selecionado:
+    def normalize(df_ativo, base_value=100):
+        return df_ativo / df_ativo.iloc[0] * base_value
+
+    # Criar colunas auxiliares
+    df_ativo['Year'] = df_ativo.index.year
+    df_ativo['Quarter'] = df_ativo.index.quarter
+    df_ativo['DayOfYear'] = df_ativo.index.dayofyear
+
+    # Determinar trimestre atual
+    current_quarter = pd.Timestamp.now().quarter  # Armazena uma vez o trimestre atual
+    df_quarter = df_ativo[df_ativo['Quarter'] == current_quarter]
+
+    # Verificar tendência do trimestre atual
+    if not df_quarter.empty:
+        first_price = df_quarter['Preço'].iloc[0]
+        last_price = df_quarter['Preço'].iloc[-1]
+        trend = "Alta" if last_price > first_price else "Baixa"
+    else:
+        trend = "Indefinida"
+
+    # Convertendo o índice para coluna para plotly
+    df_ativo.reset_index(inplace=True)
+
+    fig_sazonal = go.Figure()
+
+    for year in df_ativo['Year'].unique():
+        yearly_data = df_ativo[df_ativo['Year'] == year]
+        normalized_prices = normalize(yearly_data['Preço'])
+        fig_sazonal.add_trace(go.Scatter(
+            x=yearly_data['DayOfYear'],
+            y=normalized_prices,
+            mode='lines',
+            name=str(year)
+        ))
+
+    # Atualizando o layout para remover as grades, ajustar a legenda e adicionar marca d'água
+    fig_sazonal.update_layout(
+        xaxis=dict(
+            title='Meses',
+            tickmode='array',
+            tickvals=[31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365],
+            ticktext=['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+            showgrid=False,
+        ),
+        height=700,
+        yaxis=dict(
+            title=f'Preço Normalizado -  Sazonalidade',
+            side='right',
+            showgrid=False
+        ),
+        template='plotly_white',
+        legend=dict(
+            orientation='h',
+            yanchor='bottom',
+            y=1.02,
+            xanchor='right',
+            x=1
+        ),
+        annotations=[
+            dict(
+                text=f'{ativo_selecionado}: Sazonalidade atual de {trend}',
+                xref='paper',
+                yref='paper',
+                x=0.5,
+                y=0.99,
+                opacity=0.5,
+                font=dict(size=60, color='#76807D'),
+                showarrow=False
+            )
+        ]
+    )
+
+    st.plotly_chart(fig_sazonal, use_container_width=True)
+
 
 
 st.divider()
