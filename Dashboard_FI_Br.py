@@ -93,28 +93,87 @@ if fundo_pesquisado:
         dados_fundo['DIFF_VL_QUOTA'] = dados_fundo['VL_QUOTA'].pct_change() * 100
         dados_fundo['DIFF_VL_PATRIM'] = dados_fundo['VL_PATRIM_LIQ'].pct_change() * 100
         dados_fundo['SALD_DIA'] = dados_fundo['CAPTC_DIA'] - dados_fundo['RESG_DIA']
+        cap_total = dados_fundo['CAPTC_DIA'].sum()
+        resg_total = dados_fundo['RESG_DIA'].sum()
+        saldo_acumulado = cap_total - resg_total
         perf_acumulada = ((dados_fundo['VL_QUOTA'].iloc[-1] / dados_fundo['VL_QUOTA'].iloc[0]) - 1) * 100
 
+
         # Exibir métricas
-        col1, col2, col3 = st.columns(3)
+        col1, col2, col3, col4, col5, col6 = st.columns(6)
         col1.metric("Variação % Acumulada", f"{perf_acumulada:.2f}%")
         col2.metric("Patrimônio Líquido Atual", f"R$ {dados_fundo['VL_PATRIM_LIQ'].iloc[-1]:,.2f}")
         col3.metric("Qtd de Cotistas Atual", f"{int(dados_fundo['NR_COTST'].iloc[-1]):,}")
+        col4.metric("Captação Acumulada", f"R$ {cap_total:,.2f}")
+        col5.metric("Resgate Acumulado", f"R$ {resg_total:,.2f}")
+        col6.metric("Saldo Líquido Acumulado", f"R$ {saldo_acumulado:,.2f}")
+
 
         # Gráfico
         st.subheader("📈 Evolução das QUOTAS e Patrimônio Líquido")
         fig = go.Figure()
-        fig.add_trace(go.Scatter(x=dados_fundo['DT_COMPTC'], y=dados_fundo['VL_QUOTA'],
-                                 name="VL_QUOTA", line=dict(color=brand_colors["VERDE_PRINCIPAL"])))
-        fig.add_trace(go.Scatter(x=dados_fundo['DT_COMPTC'], y=dados_fundo['VL_PATRIM_LIQ'],
-                                 name="VL_PATRIM_LIQ", line=dict(color=brand_colors["CINZA"]), yaxis="y2"))
+
+        # Linha VL_QUOTA
+        fig.add_trace(go.Scatter(
+            x=dados_fundo['DT_COMPTC'], 
+            y=dados_fundo['VL_QUOTA'],
+            name="VL_QUOTA",
+            line=dict(color=brand_colors["VERDE_PRINCIPAL"])
+        ))
+
+        # Linha VL_PATRIM_LIQ
+        fig.add_trace(go.Scatter(
+            x=dados_fundo['DT_COMPTC'], 
+            y=dados_fundo['VL_PATRIM_LIQ'],
+            name="VL_PATRIM_LIQ",
+            line=dict(color=brand_colors["CINZA"]),
+            yaxis="y2"
+        ))
+
+        # Barras Captação Líquida
+        cores_barras = [
+            brand_colors["VERDE_DETALHES"] if valor >= 0 else brand_colors["VERDE_TEXTO"]
+            for valor in dados_fundo['SALD_DIA']
+        ]
+
+        # Adicionar barras com cores dinâmicas
+        fig.add_trace(go.Bar(
+            x=dados_fundo['DT_COMPTC'], 
+            y=dados_fundo['SALD_DIA'],
+            name="Captação Líquida",
+            marker=dict(color=cores_barras)
+        ))
+
+        # Configurações do layout
         fig.update_layout(
-            yaxis=dict(title="Valor da QUOTA"),
-            yaxis2=dict(title="VL Patrimônio Líquido", overlaying="y", side="right", showgrid=False),
-            xaxis=dict(title="", showgrid=False),
-            plot_bgcolor="rgba(0,0,0,0)",
+            yaxis=dict(
+                title="Valor da QUOTA",
+                showgrid=False,  # Remover grid do eixo y
+                zeroline=False   # Remover linha zero
+            ),
+            yaxis2=dict(
+                title="VL Patrimônio Líquido",
+                overlaying="y",
+                side="right",
+                showgrid=False,  # Remover grid do eixo y2
+                zeroline=False
+            ),
+            xaxis=dict(
+                title="",
+                showgrid=False,  # Remover grid do eixo x
+                zeroline=False
+            ),
+            plot_bgcolor="rgba(0,0,0,0)",  # Fundo transparente
+            legend=dict(
+                x=0.5,
+                y=1.2,
+                orientation="h",
+                xanchor="center"
+            ),
             height=500
         )
+
+        # Adicionar imagem no fundo
         fig.add_layout_image(
             dict(
                 source=f'data:image/png;base64,{img_str}',
