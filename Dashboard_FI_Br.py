@@ -5,8 +5,21 @@ import streamlit as st
 from io import BytesIO
 from PIL import Image
 import base64
-import plotly.express as px
+import plotly.graph_objects as go
 
+
+
+brand_colors = {
+    "VERDE_TEXTO": "#1F4741",
+    "VERDE_PRINCIPAL": "#2B6960",
+    "VERDE_DETALHES": "#49E2B1",
+    "CREME": "#FFFCF5",
+    "CINZA": "#76807D",
+    "PRETO": "#1B1B1B"
+}
+
+
+# Configurações gerais
 pd.options.display.float_format = '{:.4f}'.format
 
 # Função para carregar a imagem e converter para base64
@@ -20,130 +33,106 @@ def load_image_as_base64(image_path):
 logo_path = "./logo_transparente.png"
 img_str = load_image_as_base64(logo_path)
 
-# Configurações de cores
-brand_colors = {
-    "VERDE_TEXTO": "#1F4741",
-    "VERDE_PRINCIPAL": "#2B6960",
-    "VERDE_DETALHES": "#49E2B1",
-    "CREME": "#FFFCF5",
-    "CINZA": "#76807D",
-    "PRETO": "#1B1B1B"
-}
-
-# Função para formatar valores em R$
-def formatar_valor(valor):
-    return f"R$ {valor:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
-
 # Configuração inicial da página
-st.set_page_config(layout="wide", page_title="Análise de Fundos de Investimento", page_icon="📊")
+st.set_page_config(layout="wide", page_title="Análise de Evolução de Cotas", page_icon="📊")
 
-# Entrada de data e barra de pesquisa
+# Entrada de data e pesquisa por fundo
 col1, col2 = st.columns([1, 2])
-
 with col1:
-    data_selecionada = st.date_input("Selecione uma data:", value=pd.Timestamp.now())
-
+    data_inicio = st.date_input("📅 Data Inicial:", pd.Timestamp(2024, 1, 1))
+    data_fim = st.date_input("📅 Data Final:", pd.Timestamp.now())
 with col2:
-    fundo_pesquisado = st.text_input("🔎 Pesquisar Fundo de Investimento:", "")
+    fundo_pesquisado = st.text_input("🔎 Pesquise uma Asset/Gestora:", "")
 
-# Carregar dados
+# Carregar dados de múltiplos meses
 @st.cache_data
-def carregar_dados(data_selecionada):
-    ano = data_selecionada.year
-    mes = f"{data_selecionada.month:02d}"
-    arquivo = f"inf_diario_fi_{ano}{mes}.zip"
+def carregar_dados_multiplos(data_inicio, data_fim):
+    base_final = pd.DataFrame()
 
-    url = f'https://dados.cvm.gov.br/dados/FI/DOC/INF_DIARIO/DADOS/inf_diario_fi_{ano}{mes}.zip'
-    download = requests.get(url)
+    # Converter para Timestamp
+    data_inicio = pd.Timestamp(data_inicio)
+    data_fim = pd.Timestamp(data_fim)
 
-    # Salvar o arquivo zip localmente
-    with open(arquivo, "wb") as arquivo_cvm:
-        arquivo_cvm.write(download.content)
+    for ano in range(data_inicio.year, data_fim.year + 1):
+        for mes in range(1, 13):
+            if pd.Timestamp(ano, mes, 1) < data_inicio or pd.Timestamp(ano, mes, 1) > data_fim:
+                continue
+            try:
+                url = f"https://dados.cvm.gov.br/dados/FI/DOC/INF_DIARIO/DADOS/inf_diario_fi_{ano}{mes:02d}.zip"
+                download = requests.get(url)
+                with zipfile.ZipFile(BytesIO(download.content)) as arquivo_zip:
+                    dados_fundos = pd.read_csv(arquivo_zip.open(arquivo_zip.namelist()[0]), sep=";", encoding='ISO-8859-1')
+                dados_cadastro = pd.read_csv("https://dados.cvm.gov.br/dados/FI/CAD/DADOS/cad_fi.csv", sep=";", encoding='ISO-8859-1')
+                dados_cadastro = dados_cadastro[['CNPJ_FUNDO', 'DENOM_SOCIAL']].drop_duplicates()
+                dados_fundos = pd.merge(dados_fundos, dados_cadastro, how="left", left_on="CNPJ_FUNDO_CLASSE", right_on="CNPJ_FUNDO")
 
-    # Ler o conteúdo do arquivo zip
-    arquivo_zip = zipfile.ZipFile(arquivo)
-    dados_fundos = pd.read_csv(arquivo_zip.open(arquivo_zip.namelist()[0]), sep=";", encoding='ISO-8859-1')
+                # Adicionar colunas faltantes com zeros
+                for col in ['CAPTC_DIA', 'RESG_DIA', 'NR_COTST']:
+                    if col not in dados_fundos.columns:
+                        dados_fundos[col] = 0
 
-    # Ler dados de cadastro dos fundos
-    dados_cadastro = pd.read_csv('https://dados.cvm.gov.br/dados/FI/CAD/DADOS/cad_fi.csv', 
-                                 sep=";", encoding='ISO-8859-1')
-    dados_cadastro = dados_cadastro[['CNPJ_FUNDO', 'DENOM_SOCIAL']].drop_duplicates()
+                base_final = pd.concat([base_final, dados_fundos[['DT_COMPTC', 'CNPJ_FUNDO_CLASSE', 'DENOM_SOCIAL',
+                                                                  'VL_QUOTA', 'VL_PATRIM_LIQ', 'CAPTC_DIA', 'RESG_DIA', 'NR_COTST']]])
+            except:
+                continue
 
-    # Filtrar para início e fim do mês
-    data_inicio_mes = dados_fundos['DT_COMPTC'].min()
-    data_fim_mes = dados_fundos['DT_COMPTC'].max()
+    base_final['DT_COMPTC'] = pd.to_datetime(base_final['DT_COMPTC'], format='%Y-%m-%d')
+    return base_final.dropna().drop_duplicates()
 
-    dados_fundos_filtrado = dados_fundos[(dados_fundos['DT_COMPTC'].isin([data_inicio_mes, data_fim_mes]))]
-
-    # Merge com dados de cadastro
-    base_final = pd.merge(dados_fundos_filtrado, dados_cadastro, how="left", 
-                          left_on="CNPJ_FUNDO_CLASSE", right_on="CNPJ_FUNDO")
-    
-    base_final['Saldo Liq Cap/Res'] = base_final['CAPTC_DIA'] - base_final['RESG_DIA']
-
-    base_final = base_final[['TP_FUNDO_CLASSE', 'CNPJ_FUNDO', 'DENOM_SOCIAL', 'DT_COMPTC', 'VL_QUOTA', 
-                             'VL_PATRIM_LIQ', 'CAPTC_DIA', 'RESG_DIA', 'NR_COTST', 'Saldo Liq Cap/Res']]
-    
-    # Remover valores ausentes e duplicatas
-    base_final = base_final.dropna(subset=['DENOM_SOCIAL', 'VL_PATRIM_LIQ'])
-    base_final = base_final.drop_duplicates()
-
-    return base_final
-
-# Carregar a base de dados
-base_final = carregar_dados(data_selecionada)
-
-# Filtrar pelo fundo pesquisado
+# Carregar e filtrar dados
 if fundo_pesquisado:
+    base_final = carregar_dados_multiplos(data_inicio, data_fim)
+    base_final = base_final[base_final['DENOM_SOCIAL'].str.contains(fundo_pesquisado, case=False)]
+
+    if not base_final.empty:
+        fundos_disponiveis = base_final['DENOM_SOCIAL'].unique()
+        fundo_selecionado = st.selectbox("Selecione um Fundo de Investimento:", fundos_disponiveis)
+        dados_fundo = base_final[base_final['DENOM_SOCIAL'] == fundo_selecionado].sort_values(by="DT_COMPTC")
+
+        # Calcular métricas
+        dados_fundo['DIFF_VL_QUOTA'] = dados_fundo['VL_QUOTA'].pct_change() * 100
+        dados_fundo['DIFF_VL_PATRIM'] = dados_fundo['VL_PATRIM_LIQ'].pct_change() * 100
+        dados_fundo['SALD_DIA'] = dados_fundo['CAPTC_DIA'] - dados_fundo['RESG_DIA']
+        perf_acumulada = ((dados_fundo['VL_QUOTA'].iloc[-1] / dados_fundo['VL_QUOTA'].iloc[0]) - 1) * 100
+
+        # Exibir métricas
+        col1, col2, col3 = st.columns(3)
+        col1.metric("Variação % Acumulada", f"{perf_acumulada:.2f}%")
+        col2.metric("Patrimônio Líquido Atual", f"R$ {dados_fundo['VL_PATRIM_LIQ'].iloc[-1]:,.2f}")
+        col3.metric("Qtd de Cotistas Atual", f"{int(dados_fundo['NR_COTST'].iloc[-1]):,}")
+
+        # Gráfico
+        st.subheader("📈 Evolução das QUOTAS e Patrimônio Líquido")
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=dados_fundo['DT_COMPTC'], y=dados_fundo['VL_QUOTA'],
+                                 name="VL_QUOTA", line=dict(color=brand_colors["VERDE_PRINCIPAL"])))
+        fig.add_trace(go.Scatter(x=dados_fundo['DT_COMPTC'], y=dados_fundo['VL_PATRIM_LIQ'],
+                                 name="VL_PATRIM_LIQ", line=dict(color=brand_colors["CINZA"]), yaxis="y2"))
+        fig.update_layout(
+            yaxis=dict(title="Valor da QUOTA"),
+            yaxis2=dict(title="VL Patrimônio Líquido", overlaying="y", side="right", showgrid=False),
+            xaxis=dict(title="", showgrid=False),
+            plot_bgcolor="rgba(0,0,0,0)",
+            height=500
+        )
+        fig.add_layout_image(
+            dict(
+                source=f'data:image/png;base64,{img_str}',
+                xref="paper", yref="paper",
+                x=0.5, y=0.5,
+                sizex=0.8, sizey=0.8,
+                xanchor="center", yanchor="middle",
+                opacity=0.6,
+                layer="below"
+            )
+        )
+        st.plotly_chart(fig, use_container_width=True)
+
+
+    # Filtrar pelo fundo pesquisado
     base_final = base_final[base_final['DENOM_SOCIAL'].str.contains(fundo_pesquisado, case=False, na=False)]
-
-# Resumo Total
-total_captacao = base_final['CAPTC_DIA'].sum()
-total_resgate = base_final['RESG_DIA'].sum()
-saldo_liquido = total_captacao - total_resgate
-
-col1, col2, col3 = st.columns(3)
-col1.metric("Captação Total", formatar_valor(total_captacao))
-col2.metric("Resgate Total", formatar_valor(total_resgate))
-col3.metric("Saldo Líquido", formatar_valor(saldo_liquido))
-
-# Layout de tabela e gráfico
-col1, col2 = st.columns([7, 5])
-
-# Tabela com CSS para ocupar todo o espaço
-with col1:
-    st.subheader("🔹 Tabela - Fundos de Investimento do Brasil")
-    st.markdown("""
-        <style>
-            .dataframe {
-                width: 100%;
-                overflow-x: auto;
-            }
-            table {
-                width: 100%;
-                table-layout: fixed;
-            }
-        </style>
-    """, unsafe_allow_html=True)
-
-    st.dataframe(base_final[['TP_FUNDO_CLASSE', 'DT_COMPTC', 'DENOM_SOCIAL', 
-                             'VL_PATRIM_LIQ', 'CAPTC_DIA', 'VL_QUOTA', 'RESG_DIA', 'Saldo Liq Cap/Res']])
-
-# Gráfico: Maiores Fundos por Patrimônio Líquido
-with col2:
-    st.subheader("🔹 Top 5 Fundos por Patrimônio Líquido")
-    top_fundos = base_final.sort_values(by="VL_PATRIM_LIQ", ascending=False).head(5)
-    fig_barras = px.bar(
-        top_fundos,
-        x="VL_PATRIM_LIQ",
-        y="DENOM_SOCIAL",
-        orientation='h',
-        text="TP_FUNDO_CLASSE",
-        color="TP_FUNDO_CLASSE",
-        title="Top 5 Fundos por Patrimônio Líquido"
-    )
-    fig_barras.update_traces(textposition="inside", insidetextanchor="middle")
-    st.plotly_chart(fig_barras, use_container_width=True)
+else:
+    st.info("Digite o nome de um Fundo de Investimento para visualizar a lista de fundos, gráfico e tabela.")
 
 # Rodapé
 st.markdown("---")
