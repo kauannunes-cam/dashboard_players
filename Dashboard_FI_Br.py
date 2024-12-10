@@ -35,6 +35,7 @@ img_str = load_image_as_base64(logo_path)
 
 # Configuração inicial da página
 st.set_page_config(layout="wide", page_title="Análise de Evolução de Cotas", page_icon="📊")
+st.header("Análise dos Fundos de Investimentos no Brasil")
 
 # Entrada de data e pesquisa por fundo
 col1, col2 = st.columns([1, 2])
