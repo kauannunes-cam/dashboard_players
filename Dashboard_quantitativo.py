@@ -100,7 +100,7 @@ grid_corrl = go.Figure(
 for i in range(len(correlation_matrix.columns)):
     for j in range(len(correlation_matrix.columns)):
         correlation_value = correlation_matrix.values[i, j]
-        if correlation_value > 0.65:
+        if correlation_value > 0.65 or correlation_value < -0.65:
             grid_corrl.add_annotation(
                 x=correlation_matrix.columns[i],
                 y=correlation_matrix.columns[j],
