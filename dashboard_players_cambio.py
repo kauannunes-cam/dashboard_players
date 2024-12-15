@@ -163,7 +163,7 @@ with col2:
     # Filtro de data inicial
     with date_col1:
         start_date = st.date_input("Data Inicial", value=data_inicial, min_value=data_minima, max_value=hoje)
-        visualizar_tabela = st.checkbox("Visualizar Tabelas", key="Visualizar")
+        visualizar_tabela = st.checkbox("Visualizar Tabelas", key="Visualizar", value=True)
 
     # Filtro de data final e checkbox para definir "Hoje"
     with date_col2:
