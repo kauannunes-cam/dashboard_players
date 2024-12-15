@@ -69,15 +69,34 @@ def get_ipca_data():
 # Função para obter as metas de inflação do Boletim Focus
 def get_focus_meta():
     url = "https://api.bcb.gov.br/dados/serie/bcdata.sgs.13522/dados?formato=json"
-    response = requests.get(url)
-    if response.status_code == 200:
-        data = response.json()
-        df = pd.DataFrame(data)
-        df['data'] = pd.to_datetime(df['data'], format='%d/%m/%Y')
-        df['valor'] = pd.to_numeric(df['valor'])
-        return df
-    else:
-        st.error("Erro ao obter os dados do Boletim Focus")
+    try:
+        response = requests.get(url, timeout=10)  # Timeout para evitar bloqueios
+        # Verificar se o status code é válido
+        if response.status_code != 200:
+            st.error(f"Erro {response.status_code}: Falha ao obter os dados do Boletim Focus.")
+            return pd.DataFrame()
+
+        # Verificar se a resposta está vazia
+        if not response.text.strip():
+            st.error("A resposta da API está vazia.")
+            return pd.DataFrame()
+
+        # Tentar converter o JSON
+        try:
+            data = response.json()
+            df = pd.DataFrame(data)
+            if df.empty:
+                st.error("A resposta da API não contém dados válidos.")
+                return pd.DataFrame()
+            df['data'] = pd.to_datetime(df['data'], format='%d/%m/%Y')
+            df['valor'] = pd.to_numeric(df['valor'])
+            return df
+        except (JSONDecodeError, ValueError):
+            st.error("Erro ao decodificar a resposta da API para JSON.")
+            return pd.DataFrame()
+
+    except RequestException as e:
+        st.error(f"Erro de conexão com a API: {e}")
         return pd.DataFrame()
 
 # Obter os dados reais do IPCA acumulado 12 meses (ou similar)
