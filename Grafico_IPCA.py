@@ -5,6 +5,8 @@ import requests
 from io import BytesIO
 from PIL import Image
 import base64
+from requests.exceptions import RequestException, JSONDecodeError
+
 
 
 def load_image_as_base64(image_path):
@@ -31,6 +33,24 @@ brand_colors = {
 # Configurando o layout do Streamlit
 st.set_page_config(page_title="Preços - IPCA e Meta", layout="wide")
 st.title("IPCA e Meta de Inflação por Presidente")
+
+# Função robusta para obter dados da API
+def fetch_api_data(url, error_message):
+    try:
+        response = requests.get(url, timeout=10)  # Adicionando timeout
+        if response.status_code == 200:
+            try:
+                data = response.json()  # Tentativa de decodificar JSON
+                return pd.DataFrame(data)
+            except JSONDecodeError:
+                st.error(f"Erro ao decodificar JSON: {error_message}")
+                return pd.DataFrame()
+        else:
+            st.error(f"Erro {response.status_code}: {error_message}")
+            return pd.DataFrame()
+    except RequestException as e:
+        st.error(f"Erro de conexão: {e}")
+        return pd.DataFrame()
 
 # Função para obter os dados reais do Banco Central
 def get_ipca_data():
