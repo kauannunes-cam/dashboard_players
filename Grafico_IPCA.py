@@ -37,24 +37,28 @@ st.title("IPCA e Meta de Inflação por Presidente")
 # Função robusta para obter dados da API
 def fetch_api_data(url, error_message):
     try:
-        response = requests.get(url, timeout=10)  # Adicionando timeout
+        response = requests.get(url, timeout=30)  # Adicionando timeout
         if response.status_code == 200:
             try:
-                data = response.json()  # Tentativa de decodificar JSON
+                data = response.json()
+                if not data:  # Verifica se a resposta está vazia
+                    st.warning("A API retornou uma resposta vazia.")
+                    return pd.DataFrame()
                 return pd.DataFrame(data)
             except JSONDecodeError:
-                st.error(f"Erro ao decodificar JSON: {error_message}")
+                st.error("Erro ao decodificar JSON.")
                 return pd.DataFrame()
         else:
             st.error(f"Erro {response.status_code}: {error_message}")
             return pd.DataFrame()
     except RequestException as e:
-        st.error(f"Erro de conexão: {e}")
+        st.error(f"Erro de conexão com a API: {e}")
         return pd.DataFrame()
 
 # Função para obter os dados reais do Banco Central
 def get_ipca_data():
     url = "https://api.bcb.gov.br/dados/serie/bcdata.sgs.433/dados?formato=json"
+    df = fetch_api_data(url, "Erro ao obter os dados do Boletim Focus.")
     response = requests.get(url)
     if response.status_code == 200:
         data = response.json()
@@ -69,6 +73,7 @@ def get_ipca_data():
 # Função para obter as metas de inflação do Boletim Focus
 def get_focus_meta():
     url = "https://api.bcb.gov.br/dados/serie/bcdata.sgs.13522/dados?formato=json"
+    df = fetch_api_data(url, "Erro ao obter os dados do IPCA.")
     try:
         response = requests.get(url, timeout=10)  # Timeout para evitar bloqueios
         # Verificar se o status code é válido
@@ -102,6 +107,7 @@ def get_focus_meta():
 # Obter os dados reais do IPCA acumulado 12 meses (ou similar)
 def get_ipca_acumulado():
     url = "https://api.bcb.gov.br/dados/serie/bcdata.sgs.4449/dados?formato=json"
+    df = fetch_api_data(url, "Erro ao obter os dados do IPCA.")
     response = requests.get(url)
     if response.status_code == 200:
         data = response.json()
