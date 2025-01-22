@@ -417,8 +417,7 @@ with col1:
         st.plotly_chart(gr4, use_container_width=True)
         
 with col2:
-        ibovespa_cotacao_dolar = ibovespa_cotacao_dolar.tail(30)
-        st.table(final_df.tail(28))
+        st.table(final_df.tail(24))
         
 # Rodapé
 st.markdown("---")
