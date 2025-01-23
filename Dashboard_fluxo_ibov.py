@@ -244,8 +244,8 @@ gr1.add_layout_image(
     dict(
         source=f'data:image/png;base64,{img_str}',
         xref="paper", yref="paper",
-        x=0.5, y=0.8,
-        sizex=0.4, sizey=0.4,
+        x=0.03, y=0.8,
+        sizex=0.2, sizey=0.2,
         xanchor="center", yanchor="middle",
         opacity=0.7,
         layer="below"
@@ -282,8 +282,8 @@ gr3.add_layout_image(
 dict(
     source=f'data:image/png;base64,{img_str}',
     xref="paper", yref="paper",
-    x=0.5, y=0.8,
-    sizex=0.4, sizey=0.4,
+    x=0.03, y=0.8,
+    sizex=0.2, sizey=0.2,
     xanchor="center", yanchor="middle",
     opacity=0.7,
     layer="below"
@@ -337,8 +337,8 @@ with col1:
                 dict(
                     source=f'data:image/png;base64,{img_str}',
                     xref="paper", yref="paper",
-                    x=0.5, y=0.8,
-                    sizex=0.4, sizey=0.4,
+                    x=0.03, y=0.8,
+                    sizex=0.2, sizey=0.2,
                     xanchor="center", yanchor="middle",
                     opacity=0.7,
                     layer="below"
@@ -405,8 +405,8 @@ with col1:
             dict(
                 source=f'data:image/png;base64,{img_str}',
                 xref="paper", yref="paper",
-                x=0.5, y=0.8,
-                sizex=0.4, sizey=0.4,
+                x=0.03, y=0.8,
+                sizex=0.2, sizey=0.2,
                 xanchor="center", yanchor="middle",
                 opacity=0.7,
                 layer="below"
