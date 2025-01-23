@@ -151,14 +151,13 @@ if periodos[periodo_escolhido]:
 else:
     ultimas_datas = fluxo_ibovespa.index
 
-# Cria o dataframe unificado
+# Cria o dataframe unificado apenas com as datas do período escolhido
 fluxo_ibov_dolarizado = pd.DataFrame({
-    'Fluxo Estrangeiro': fluxo_ibovespa.reindex(ultimas_datas, fill_value=0)['Fluxo Estrangeiro'],
-    'Ibovespa em Dólar': ibovespa_cotacao_dolar.reindex(ultimas_datas, fill_value=0)
+    'Fluxo Estrangeiro': fluxo_ibovespa.loc[ultimas_datas, 'Fluxo Estrangeiro'],
+    'Ibovespa em Dólar': ibovespa_cotacao_dolar.loc[ultimas_datas]
 })
 
-
-fluxo_ibov_dolarizado = fluxo_ibov_dolarizado.sort_index(ascending=False)
+fluxo_ibov_dolarizado = fluxo_ibov_dolarizado.sort_index(ascending=True)
 
 df_mensal = pd.DataFrame()
 
@@ -199,7 +198,7 @@ gr1 = go.Figure()
 
 # Adiciona barras para o Fluxo Estrangeiro IBOV Spot
 gr1.add_trace(go.Bar(
-    x=all_dates,
+    x=fluxo_ibov_dolarizado.index,
     y=fluxo_ibov_dolarizado['Fluxo Estrangeiro'],
     name='Fluxo IBOV Spot',
     marker_color=[
@@ -210,7 +209,7 @@ gr1.add_trace(go.Bar(
 
 # Adiciona linha para a Cotação IBOVESPA em dólar no eixo secundário
 gr1.add_trace(go.Scatter(
-    x=all_dates,
+    x=fluxo_ibov_dolarizado.index,
     y=fluxo_ibov_dolarizado['Ibovespa em Dólar'],
     name='Cotação IBOVESPA (USD)',
     mode='lines',
