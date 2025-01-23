@@ -405,7 +405,7 @@ with col1:
             dict(
                 source=f'data:image/png;base64,{img_str}',
                 xref="paper", yref="paper",
-                x=0.03, y=0.9,
+                x=0.03, y=0.8,
                 sizex=0.2, sizey=0.2,
                 xanchor="center", yanchor="middle",
                 opacity=0.7,
