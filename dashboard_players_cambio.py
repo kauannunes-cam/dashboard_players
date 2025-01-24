@@ -409,3 +409,6 @@ for player_name, df in dfs_formatados.items():
 # Primeira linha - Estrangeiros e Fundo Local
 col1, col2, col3, col4, col5 = st.columns(5)
 
+# Rodapé
+st.markdown("---")
+st.markdown("**Desenvolvido por Kauan Nunes - Cambirela Educa**")
