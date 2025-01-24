@@ -130,3 +130,8 @@ def exibir_dashboard():
 # Main
 if __name__ == "__main__":
     exibir_dashboard()
+
+
+# Rodapé
+st.markdown("---")
+st.markdown("**Desenvolvido por Kauan Nunes - Cambirela Educa**")
