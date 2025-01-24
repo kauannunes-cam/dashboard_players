@@ -801,6 +801,6 @@ with col2:
     st.plotly_chart(fig_corrl, use_container_width=True)
 st.divider()
     
-# Observações e insights (opcional)
-#st.write("### Insights")
-#st.text("Inclua aqui observações sobre o comportamento do ativo selecionado.")
+# Rodapé
+st.markdown("---")
+st.markdown("**Desenvolvido por Kauan Nunes - Cambirela Educa**")
