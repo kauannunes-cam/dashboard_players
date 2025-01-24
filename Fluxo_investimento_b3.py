@@ -164,3 +164,8 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+# Rodapé
+st.markdown("---")
+st.markdown("**Desenvolvido por Kauan Nunes - Cambirela Educa**")
