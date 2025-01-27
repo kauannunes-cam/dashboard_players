@@ -123,9 +123,6 @@ def exibir_dashboard():
             unsafe_allow_html=True
         )
         
-        # Rodapé
-    st.markdown("---")
-    st.markdown("**Desenvolvido por Kauan Nunes - Cambirela Educa**")
 
 # Main
 if __name__ == "__main__":
