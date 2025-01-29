@@ -243,7 +243,6 @@ def plot_combined_chart(player_df, uc1_df, player_name):
             title='Contratos (U$$)',
             side='left',
             showgrid=False,
-            titlefont=dict(color=brand_colors["CREME"]),  # Coloração para o eixo das barras
             tickfont=dict(color=brand_colors["CREME"])
         ),
         yaxis2=dict(
@@ -251,7 +250,6 @@ def plot_combined_chart(player_df, uc1_df, player_name):
             overlaying='y',
             side='right',
             showgrid=False,
-            titlefont=dict(color=brand_colors["CREME"]),  # Coloração para o eixo do saldo
             tickfont=dict(color=brand_colors["CREME"])
         ),
         yaxis3=dict(
@@ -259,7 +257,6 @@ def plot_combined_chart(player_df, uc1_df, player_name):
             side='right',
             position=0.5,
             showgrid=True,
-            titlefont=dict(color=brand_colors["CINZA"]),  # Coloração para o eixo UC1
             tickfont=dict(color="#3DF2C1")
         ),
         barmode='stack',
