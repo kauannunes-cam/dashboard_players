@@ -141,7 +141,7 @@ for player, dfs in all_dataframes.items():
     combined_df = pd.concat(dfs, axis=1)
     combined_df['saldo'] = combined_df.sum(axis=1)
     combined_df['var_liq'] = combined_df['saldo'].diff()
-    combined_df['var_%'] = combined_df['saldo'].pct_change() * 100  # Calcula a variação percentual diária
+    combined_df['var_%'] = combined_df['saldo'].pct_change(fill_method=None) * 100  # Calcula a variação percentual diária
     globals()[f'df_{player}'] = combined_df
 
 # Função para formatar números no estilo brasileiro
@@ -299,10 +299,10 @@ def calcular_variacoes(df):
     for ativo in ['dolarcheio', 'dolarmini', 'swap', 'ddi']:
         if ativo in df.columns:
             df[f'var_$_{ativo}'] = df[ativo].diff()
-            df[f'var_%_{ativo}'] = df[ativo].pct_change() * 100
+            df[f'var_%_{ativo}'] = df[ativo].pct_change(fill_method=None) * 100
     # Calcula o saldo e variação percentual do saldo
     df['var_liq_saldo'] = df['saldo'].diff()
-    df['var_%_saldo'] = df['saldo'].pct_change() * 100
+    df['var_%_saldo'] = df['saldo'].pct_change(fill_method=None) * 100
 
     # Reorganiza as colunas conforme solicitado
     ordered_columns = []
