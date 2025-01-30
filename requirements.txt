@@ -4,7 +4,7 @@ Pillow==10.0.0
 plotly==5.20.0
 matplotlib==3.8.0
 numpy==1.26.4
-yfinance==0.2.30
+yfinance
 openpyxl==3.1.4
 keras
 tensorflow
