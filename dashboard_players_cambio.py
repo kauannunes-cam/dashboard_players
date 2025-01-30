@@ -75,8 +75,8 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Caminho para os arquivos Excel
-file_path_saldos = 'History dollar B3.xlsx'
-file_path_uc1 = 'History Cot.xlsx'
+file_path_saldos = 'C:\\Users\\Kauan\\OneDrive - Cambirela\\3 - Cambirela Tabelas Excel\\History dollar B3.xlsx'
+file_path_uc1 = 'C:\\Users\\Kauan\\OneDrive - Cambirela\\3 - Cambirela Tabelas Excel\\History Cot.xlsx'
 
 # Carrega todas as planilhas de saldos em um dicionário de dataframes
 excel_data_saldos = pd.read_excel(file_path_saldos, sheet_name=None, skiprows=2)
@@ -101,7 +101,7 @@ uc1_df = ativos_selected['UC1']
 
 
 # Caminho para o arquivo Excel
-file_path = 'History dollar B3.xlsx'
+file_path = 'C:\\Users\\Kauan\\OneDrive - Cambirela\\3 - Cambirela Tabelas Excel\\History dollar B3.xlsx'
 
 # Carrega todas as planilhas em um dicionário de dataframes
 excel_data = pd.read_excel(file_path, sheet_name=None, skiprows=2)
@@ -163,7 +163,7 @@ with col2:
     # Filtro de data inicial
     with date_col1:
         start_date = st.date_input("Data Inicial", value=data_inicial, min_value=data_minima, max_value=hoje)
-        visualizar_tabela = st.checkbox("Visualizar Tabelas", key="Visualizar", value=True)
+        visualizar_tabela = st.checkbox("Visualizar Tabelas", key="Visualizar")
 
     # Filtro de data final e checkbox para definir "Hoje"
     with date_col2:
@@ -185,7 +185,7 @@ def load_image_as_base64(image_path):
     return base64.b64encode(buffered.getvalue()).decode()
 
 # Caminho da logo (ajuste conforme necessário)
-logo_path = "logo_transparente_cambirela.png"
+logo_path = "C:\\Users\\Kauan\\OneDrive - Cambirela\\3 - Cambirela Tabelas Excel\\Dashboards-Cambirela\\logo_transparente_cambirela.png"
 
 
 # Carregar logo como base64 para usar em marca d'água
@@ -243,6 +243,7 @@ def plot_combined_chart(player_df, uc1_df, player_name):
             title='Contratos (U$$)',
             side='left',
             showgrid=False,
+            titlefont=dict(color=brand_colors["CREME"]),  # Coloração para o eixo das barras
             tickfont=dict(color=brand_colors["CREME"])
         ),
         yaxis2=dict(
@@ -250,6 +251,7 @@ def plot_combined_chart(player_df, uc1_df, player_name):
             overlaying='y',
             side='right',
             showgrid=False,
+            titlefont=dict(color=brand_colors["CREME"]),  # Coloração para o eixo do saldo
             tickfont=dict(color=brand_colors["CREME"])
         ),
         yaxis3=dict(
@@ -257,6 +259,7 @@ def plot_combined_chart(player_df, uc1_df, player_name):
             side='right',
             position=0.5,
             showgrid=True,
+            titlefont=dict(color=brand_colors["CINZA"]),  # Coloração para o eixo UC1
             tickfont=dict(color="#3DF2C1")
         ),
         barmode='stack',
@@ -318,6 +321,8 @@ def calcular_variacoes(df):
 dfs = {'Estrangeiro': df_estrangeiro, 'Fundo Local': df_flocal, 'Bancos': df_bancos, 'Pessoas Jurídicas': df_pj, 'Pessoas Físicas': df_pf}
 dfs_variados = {player: calcular_variacoes(df) for player, df in dfs.items()}
 
+
+
 # Ajustar o DataFrame para incluir a data, ordenar, e formatar
 dfs_formatados = {}
 for player_name, df in dfs_variados.items():
@@ -351,7 +356,7 @@ for player_name, df in dfs_formatados.items():
 
     if visualizar_tabela:
         try:
-            col1, col2 = st.columns([3, 5])  # Define proporção das colunas
+            col1, col2 = st.columns([1, 3])  # Define proporção das colunas
 
             with col1:
                 st.write("")
@@ -372,19 +377,19 @@ for player_name, df in dfs_formatados.items():
                 """
                 <style>
                     .dataframe {
-                        width: 100%; /* Define largura da tabela como 90% */
+                        width: 80%; /* Define largura da tabela como 100% */
                     }
                     .dataframe tbody td {
                         text-align: center; /* Centraliza os valores dentro das células */
-                        font-size: 10px; /* Define o tamanho da fonte para o corpo */
+                        font-size: 12px; /* Define o tamanho da fonte para o corpo */
                     }
                     .dataframe thead th {
                         text-align: center; /* Centraliza os cabeçalhos */
-                        font-size: 10px; /* Define o tamanho da fonte para os cabeçalhos */
+                        font-size: 12px; /* Define o tamanho da fonte para os cabeçalhos */
                     }
                     .reportview-container .main .block-container {
-                        max-width: 1300px;
-                        padding: 1rem 1rem;
+                        max-width: 1600px;
+                        padding: 1rem 2rem;
                         background-color: rgba(0, 0, 0, 0);
                     }
                 </style>
@@ -403,9 +408,7 @@ for player_name, df in dfs_formatados.items():
 
 
 
-# Primeira linha - Estrangeiros e Fundo Local
-col1, col2, col3, col4, col5 = st.columns(5)
-
 # Rodapé
 st.markdown("---")
 st.markdown("**Desenvolvido por Kauan Nunes - Cambirela Educa**")
+
