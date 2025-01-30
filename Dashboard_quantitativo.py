@@ -201,7 +201,7 @@ st.title("Análise Quantitativa")
 # Função para calcular a variação percentual e sequências com setas coloridas
 def processar_dados_com_setas_coloridas(df):
     df = df.copy()
-    df['Variação (%)'] = df['Preço'].pct_change() * 100
+    df['Variação (%)'] = df['Preço'].pct_change(fill_method=None) * 100
     df['Trend'] = df['Preço'].diff().apply(lambda x: '⬆️' if x > 0 else '⬇️')  # Adiciona setas
     df['Sequence'] = (df['Trend'] != df['Trend'].shift()).cumsum()
     df['Sequência'] = df.groupby('Sequence').cumcount() + 1
@@ -264,7 +264,7 @@ with col1:
 df_ativo = ativos_selected[ativo_selecionado]
 df_ativo_filtrado = filtrar_por_periodo(df_ativo, periodo_selecionado)
 
-variacao = df_ativo_filtrado['Preço'].pct_change().dropna()
+variacao = df_ativo_filtrado['Preço'].pct_change(fill_method=None).dropna()
 desviop_7d = variacao.rolling(window=7).std()
 desviop_14d = variacao.rolling(window=14).std()
 desviop_21d = variacao.rolling(window=21).std()
@@ -290,7 +290,7 @@ preço_ontem = df_ativo_filtrado['Preço'].iloc[-2] if len(df_ativo_filtrado) > 
 maximo = df_ativo_filtrado['Preço'].max()
 minimo = df_ativo_filtrado['Preço'].min()
 variacao_dia = ((preco_atual - preço_ontem) / preço_ontem) * 100 if preço_ontem else 0
-volatilidade = df_ativo_filtrado['Preço'].pct_change().std() * np.sqrt(len(df_ativo_filtrado)) * 100
+volatilidade = df_ativo_filtrado['Preço'].pct_change(fill_method=None).std() * np.sqrt(len(df_ativo_filtrado)) * 100
 
 
 desvios = [preco_atual + i * media_desvios * preco_atual for i in range(1, dp)]
@@ -315,7 +315,7 @@ else:
 
 
 # Identificar variações diárias
-df_ativo_filtrado['Variação'] = df_ativo_filtrado['Preço'].pct_change()
+df_ativo_filtrado['Variação'] = df_ativo_filtrado['Preço'].pct_change(fill_method=None)
 
 # Inicializar variáveis para sequências
 dias_seq_positiva = []
