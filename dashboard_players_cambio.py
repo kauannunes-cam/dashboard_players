@@ -185,7 +185,7 @@ def load_image_as_base64(image_path):
     return base64.b64encode(buffered.getvalue()).decode()
 
 # Caminho da logo (ajuste conforme necessário)
-logo_path = "C:\\Users\\Kauan\\OneDrive - Cambirela\\3 - Cambirela Tabelas Excel\\Dashboards-Cambirela\\logo_transparente_cambirela.png"
+logo_path = "logo_transparente_cambirela.png"
 
 
 # Carregar logo como base64 para usar em marca d'água
