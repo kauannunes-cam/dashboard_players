@@ -79,13 +79,13 @@ file_path_saldos = 'History dollar B3.xlsx'
 file_path_uc1 = 'History Cot.xlsx'
 
 # Carrega todas as planilhas de saldos em um dicionário de dataframes
-excel_data_saldos = pd.read_excel(file_path_saldos, sheet_name=None, skiprows=2)
+excel_data_saldos = pd.read_excel(file_path_saldos, sheet_name=None, skiprows=1)
 
 # Carrega o arquivo Excel para o UC1
 xls = pd.ExcelFile(file_path_uc1)
 ativos = {}
 for sheet_name in xls.sheet_names:
-    df = pd.read_excel(xls, sheet_name=sheet_name, skiprows=2)
+    df = pd.read_excel(xls, sheet_name=sheet_name, skiprows=1)
     df.columns.values[0] = 'Data'
     df.columns.values[1] = 'Preço'
     df_selected = df[['Data', 'Preço']]
@@ -104,7 +104,7 @@ uc1_df = ativos_selected['UC1']
 file_path = 'History dollar B3.xlsx'
 
 # Carrega todas as planilhas em um dicionário de dataframes
-excel_data = pd.read_excel(file_path, sheet_name=None, skiprows=2)
+excel_data = pd.read_excel(file_path, sheet_name=None, skiprows=1)
 
 # Listas de players e ativos
 players = ['estrangeiro', 'flocal', 'bancos', 'pj', 'pf']
