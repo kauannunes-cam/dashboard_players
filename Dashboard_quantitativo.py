@@ -60,7 +60,7 @@ def carregar_dados():
     xls = pd.ExcelFile("History Cot.xlsx")
     ativos = {}
     for sheet_name in xls.sheet_names:
-        df = pd.read_excel(xls, sheet_name=sheet_name, skiprows=2)
+        df = pd.read_excel(xls, sheet_name=sheet_name, skiprows=1)
         df.columns.values[0] = 'Data'
         df.columns.values[1] = 'Preço'
         df.set_index('Data', inplace=True)
