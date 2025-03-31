@@ -72,8 +72,8 @@ def carregar_dados():
 ativos = carregar_dados()
 
 # Lista de ativos
-selected_assets = ['BBDXY', 'Bitcoin', 'CL1', 'CO1', 'DM1', 'ES1', 'NQ1', 'ODF26', 'ODF27', 'ODN26', 
-                   'T-02', 'T-10', 'UC1', 'UC2', 'USDMXN', 'VIX', 'XAU', 'XB1','XB2', 'BCOMGR', 'CDS Brazil']
+selected_assets = ['Bitcoin','ES1','ODF27', 
+                   'UC1', 'UC2', 'XB1','XB2']
 ativos_selected = {key: ativos[key] for key in selected_assets if key in ativos}
 
 
@@ -121,9 +121,9 @@ grid_corrl.update_layout(
 
 
 # Lista de ativos
-ativos_predicao = ['BBDXY', 'Bitcoin', 'CL1', 'CO1', 'DM1', 'ES1', 'NQ1', 'ODF26', 'ODF27', 'ODN26', 
-                   'T-02', 'T-10', 'UC1', 'UC2', 'USDMXN', 'VIX', 'XAU', 'XB1','XB2', 'BCOMGR', 'CDS Brazil']
 
+ativos_predicao = ['Bitcoin','ES1','ODF27', 
+                   'UC1', 'UC2', 'XB1','XB2']
 
 # Função para treinar o modelo e fazer previsões
 @st.cache_data
