@@ -45,7 +45,7 @@ z_99 = 2.33
 periodos_disponiveis = ["60 dias", "6 meses", "1 ano", "5 anos", "Base Total"]
 
 def carregar_dados():
-    xls = pd.ExcelFile("C:\\Users\\Kauan\\OneDrive\\Área de Trabalho\\Cambirela Quant\\History Cot.xlsx")
+    xls = pd.ExcelFile("History Cot.xlsx")
     ativos = {}
     for sheet_name in xls.sheet_names:
         df = pd.read_excel(xls, sheet_name=sheet_name, skiprows=2)
