@@ -131,7 +131,9 @@ def get_direcao_projetada(ativos):
 st.title("Predição e Volatilidade")
 
 # Seletor de ativo e período (preset "1 ano" – índice 2)
-ativo_selecionado = st.selectbox("Selecione o ativo:", list(ativos.keys()))
+ativos_keys = list(ativos.keys())
+default_index = ativos_keys.index("WDOFUT") if "WDOFUT" in ativos_keys else 0
+ativo_selecionado = st.selectbox("Selecione o ativo:", ativos_keys, index=default_index)
 periodo_selecionado = st.selectbox("Selecione o período:", periodos_disponiveis, index=2)
 st.write("Visualizar Médias Móveis:")
 exibir_medias_moveis = st.checkbox("Exibir Médias Móveis (50, 100, 200 períodos)", value=True)
