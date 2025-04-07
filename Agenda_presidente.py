@@ -131,4 +131,4 @@ if __name__ == "__main__":
 
 # Rodapé
 st.markdown("---")
-st.markdown("**Desenvolvido por Kauan Nunes - Cambirela Educa**")
+st.markdown("**Desenvolvido por Kauan Nunes - Trader QUANT**")
