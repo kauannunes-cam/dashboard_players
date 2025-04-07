@@ -264,3 +264,7 @@ fig.add_layout_image(
 )
 
 st.plotly_chart(fig, use_container_width=True)
+
+# Rodapé
+st.markdown("---")
+st.markdown("**Desenvolvido por Kauan Nunes - Trader QUANT**")
