@@ -400,7 +400,6 @@ for player_name, df in dfs_formatados.items():
                 df.head(quantidade_dias).to_html(index=False, justify='center', classes='dataframe'),  # Converte DataFrame para HTML
                 unsafe_allow_html=True
             )
-            st.divider()
         except Exception as e:
             st.error(f"Erro ao renderizar tabela para {player_name}: {e}")
 
