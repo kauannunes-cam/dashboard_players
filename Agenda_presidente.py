@@ -11,7 +11,7 @@ brand_colors = {
     "VERDE_PRINCIPAL": "#2B6960",
     "VERDE_DETALHES": "#49E2B1",
     "CREME": "#FFFCF5",
-    "CINZA": "#76807D",
+    "CINZA": "#969B91",
     "PRETO": "#1B1B1B"
 }
 
