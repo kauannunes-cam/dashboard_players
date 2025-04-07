@@ -281,7 +281,7 @@ def plot_combined_chart(player_df, uc1_df, player_name):
             source=f'data:image/png;base64,{img_str}',
             xref="paper", yref="paper",
             x=0.5, y=1.15,
-            sizex=0.2, sizey=0.2,
+            sizex=0.5, sizey=0.5,
             xanchor="center", yanchor="middle",
             opacity=1,
             layer="below"
