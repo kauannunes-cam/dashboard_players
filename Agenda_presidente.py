@@ -89,8 +89,14 @@ def exibir_dashboard():
                 margin-bottom: 5px;
             }}
 
+            div.stAlert[data-testid="stAlert-success"] {{
+            background-color: #050835 !important;
+            border: none;
+            color: #ffffff !important;
+            }}    
+
             /* Texto dentro da st.success */
-            div.stAlert[data-testid="stAlert-success"] p {
+            div.stAlert[data-testid="stAlert-success"] p {{
                 color: #ffffff !important;
                 font-weight: bold;
             }}
