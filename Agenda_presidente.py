@@ -88,6 +88,12 @@ def exibir_dashboard():
                 font-weight: bold;
                 margin-bottom: 5px;
             }}
+
+            /* Texto dentro da st.success */
+            div.stAlert[data-testid="stAlert-success"] p {
+                color: #ffffff !important;
+                font-weight: bold;
+            }
         </style>
         """,
         unsafe_allow_html=True
