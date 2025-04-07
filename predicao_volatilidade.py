@@ -134,7 +134,7 @@ st.title("Predição e Volatilidade")
 ativo_selecionado = st.selectbox("Selecione o ativo:", list(ativos.keys()))
 periodo_selecionado = st.selectbox("Selecione o período:", periodos_disponiveis, index=2)
 st.write("Visualizar Médias Móveis:")
-exibir_medias_moveis = st.checkbox("Exibir Médias Móveis (50, 100, 200 períodos)", value=False)
+exibir_medias_moveis = st.checkbox("Exibir Médias Móveis (50, 100, 200 períodos)", value=True)
 st.divider()
 
 # Filtragem dos dados do ativo selecionado
