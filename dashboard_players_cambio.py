@@ -407,6 +407,6 @@ for player_name, df in dfs_formatados.items():
 
 # Rodapé
 st.markdown("---")
-st.markdown("**Desenvolvido por Kauan Nunes - Cambirela Educa**")
+st.markdown("**Desenvolvido por Kauan Nunes - Trader QUANT**")
 
 
