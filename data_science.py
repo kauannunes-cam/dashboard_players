@@ -31,12 +31,20 @@ Este relatório apresenta uma análise quantitativa de ativos com foco em:
 - **Z-score com base na MM100**
 - **Predição com LSTM**
 - **Exponente de Hurst**
+- **Volatilidade Condicional via TGARCH**
 
 🧠 **Como interpretar**:
 - Z-score > 2 → Ativo sobrecomprado  
 - Z-score < -2 → Ativo sobrevendido  
-- Hurst > 0.5 → Tendência persistente; Hurst < 0.5 → Aleatório  
-- RSI > 70 → Sobrecompra; RSI < 30 → Sobrevenda  
+- Hurst > 0.5 → Tendência persistente  
+- Hurst < 0.5 → Comportamento aleatório  
+- RSI > 70 → Sobrecompra  
+- RSI < 30 → Sobrevenda  
+- MAPE: Indica o erro percentual médio entre o valor previsto e o valor real. Quanto menor, melhor.  
+  - MAPE < 5% → Excelente  
+  - 5% a 10% → Muito bom  
+  - 10% a 20% → Aceitável  
+  - > 20% → Atenção: erro elevado
 """)
 
 cores = {
@@ -62,7 +70,7 @@ def filtrar_por_periodo(df, periodo):
 
 @st.cache_data
 def carregar_dados():
-    xls = pd.ExcelFile("C:\\Users\\Kauan\\OneDrive\\Área de Trabalho\\Cambirela Quant\\History Cot.xlsx")
+    xls = pd.ExcelFile("History Cot.xlsx")
     ativos = {}
     for sheet_name in xls.sheet_names:
         df = pd.read_excel(xls, sheet_name=sheet_name, skiprows=2)
