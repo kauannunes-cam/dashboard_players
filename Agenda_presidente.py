@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 
 # Cores da marca Cambirela
 brand_colors = {
-    "VERDE_TEXTO": "#1F4741",
+    "VERDE_TEXTO": "#2d63b2",
     "VERDE_PRINCIPAL": "#2B6960",
     "VERDE_DETALHES": "#49E2B1",
     "CREME": "#FFFCF5",
