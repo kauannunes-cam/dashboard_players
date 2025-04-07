@@ -25,27 +25,34 @@ img_str = load_image_as_base64(logo_path)
 st.set_page_config(page_title="Relatório Quant - Cambirela", layout="wide")
 st.title("📊 Relatório de Risco e Predição - Cambirela Quant")
 
-st.markdown("""
-Este relatório apresenta uma análise quantitativa de ativos com foco em:
-- **Indicadores Técnicos** (RSI, Bandas de Bollinger, Drawdown)
-- **Z-score com base na MM100**
-- **Predição com LSTM**
-- **Exponente de Hurst**
-- **Volatilidade Condicional via TGARCH**
+col10, col11 = st.columns([2, 2])
+with col10:
+    # Exibir a figura interativa no Streamlit
+    st.markdown("""
+    Este relatório apresenta uma análise quantitativa de ativos com foco em:
+    - **Indicadores Técnicos** (RSI, Bandas de Bollinger, Drawdown)
+    - **Z-score com base na MM100**
+    - **Predição com LSTM**
+    - **Exponente de Hurst**
+    - **Volatilidade Condicional via TGARCH**
+    """)
+    
 
-🧠 **Como interpretar**:
-- Z-score > 2 → Ativo sobrecomprado  
-- Z-score < -2 → Ativo sobrevendido  
-- Hurst > 0.5 → Tendência persistente  
-- Hurst < 0.5 → Comportamento aleatório  
-- RSI > 70 → Sobrecompra  
-- RSI < 30 → Sobrevenda  
-- MAPE: Indica o erro percentual médio entre o valor previsto e o valor real. Quanto menor, melhor.  
-  - MAPE < 5% → Excelente  
-  - 5% a 10% → Muito bom  
-  - 10% a 20% → Aceitável  
-  - > 20% → Atenção: erro elevado
-""")
+with col11:
+    st.markdown("""
+    🧠 **Como interpretar**:
+    - Z-score > 2 → Ativo sobrecomprado  
+    - Z-score < -2 → Ativo sobrevendido  
+    - Hurst > 0.5 → Tendência persistente  
+    - Hurst < 0.5 → Comportamento aleatório  
+    - RSI > 70 → Sobrecompra  
+    - RSI < 30 → Sobrevenda  
+    - MAPE: Indica o erro percentual médio entre o valor previsto e o valor real. Quanto menor, melhor.  
+    - MAPE < 5% → Excelente  
+    - 5% a 10% → Muito bom  
+    - 10% a 20% → Aceitável  
+    - > 20% → Atenção: erro elevado
+    """)
 
 cores = {
     "primarias": ["#7cb9f2", "#2d63b2", "#050835", "#010207"],
