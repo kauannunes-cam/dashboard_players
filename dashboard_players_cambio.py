@@ -185,7 +185,7 @@ def load_image_as_base64(image_path):
     return base64.b64encode(buffered.getvalue()).decode()
 
 # Caminho da logo (ajuste conforme necessário)
-logo_path = "logo_transparente_cambirela.png"
+logo_path = "logo_transparente_kn.png"
 
 
 # Carregar logo como base64 para usar em marca d'água
