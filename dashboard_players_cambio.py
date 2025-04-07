@@ -94,9 +94,9 @@ for sheet_name in xls.sheet_names:
     ativos[sheet_name] = df_sorted
 
 # Seleciona o UC1
-selected_assets = ['UC1']
+selected_assets = ['WDOFUT']
 ativos_selected = {key: ativos[key] for key in selected_assets if key in ativos}
-uc1_df = ativos_selected['UC1']
+uc1_df = ativos_selected['WDOFUT']
 
 
 
@@ -216,7 +216,7 @@ def plot_combined_chart(player_df, uc1_df, player_name):
         x=uc1_df_filtered.index,
         y=uc1_df_filtered['Preço'],
         mode='lines',
-        name='UC1',
+        name='WDOFUT',
         line=dict(color="#3DF2C1", shape='spline'),
         yaxis="y3",
         showlegend=True
@@ -257,7 +257,7 @@ def plot_combined_chart(player_df, uc1_df, player_name):
             side='right',
             position=0.5,
             showgrid=True,
-            title=dict(text='Preço UC1', font=dict(color=brand_colors["CINZA"])),
+            title=dict(text='Preço WDOFUT', font=dict(color=brand_colors["CINZA"])),
             tickfont=dict(color="#3DF2C1")
         ),
         barmode='stack',
