@@ -313,6 +313,26 @@ max_seq_negativa = 0
 dias_var_positiva = df_ativo_filtrado[df_ativo_filtrado['Variação'] > (var_95_percentual/100)].index
 dias_var_negativa = df_ativo_filtrado[df_ativo_filtrado['Variação'] < -(var_95_percentual/100)].index
 
+# Loop para identificar sequências e armazenar datas
+for idx, var in enumerate(df_ativo_filtrado['Variação']):
+    if var > 0:
+        current_seq_positiva.append(df_ativo_filtrado.index[idx])
+        current_seq_negativa = []
+    elif var < 0:
+        current_seq_negativa.append(df_ativo_filtrado.index[idx])
+        current_seq_positiva = []
+    else:
+        current_seq_positiva = []
+        current_seq_negativa = []
+    
+    if len(current_seq_positiva) > max_seq_positiva:
+        max_seq_positiva = len(current_seq_positiva)
+        dias_seq_positiva = current_seq_positiva[:]
+    
+    if len(current_seq_negativa) > max_seq_negativa:
+        max_seq_negativa = len(current_seq_negativa)
+        dias_seq_negativa = current_seq_negativa[:]
+
 df_ativo_filtrado['Media_50'] = df_ativo_filtrado['Preço'].rolling(window=50).mean()
 df_ativo_filtrado['Media_100'] = df_ativo_filtrado['Preço'].rolling(window=100).mean()
 df_ativo_filtrado['Media_200'] = df_ativo_filtrado['Preço'].rolling(window=200).mean()
