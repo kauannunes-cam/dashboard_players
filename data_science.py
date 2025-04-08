@@ -23,7 +23,7 @@ def load_image_as_base64(image_path):
 img_str = load_image_as_base64(logo_path)
 
 st.set_page_config(page_title="Relatório Quant - Cambirela", layout="wide")
-st.title("📊 Relatório de Risco e Predição - Cambirela Quant")
+st.title("📊 Relatório de Risco e Predição - KnQuant")
 
 col10, col11 = st.columns([2, 2])
 with col10:
