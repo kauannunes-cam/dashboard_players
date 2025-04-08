@@ -265,6 +265,108 @@ fig.add_layout_image(
 
 st.plotly_chart(fig, use_container_width=True)
 
+mes_atual_inicio = datetime(datetime.today().year, datetime.today().month, 1)
+df_mes_atual = df_ativo_filtrado[df_ativo_filtrado.index >= mes_atual_inicio]
+
+if not df_mes_atual.empty:
+    preco_inicio_mes = df_mes_atual['Preço'].iloc[0]  # Primeiro preço do mês
+    variacao_mensal = ((preco_atual - preco_inicio_mes) / preco_inicio_mes) * 100
+else:
+    preco_inicio_mes = preco_atual  # Caso não haja dados para o mês atual
+    variacao_mensal = 0.0
+
+preco_atual = df_ativo_filtrado['Preço'].iloc[-1]
+preço_ontem = df_ativo_filtrado['Preço'].iloc[-2] if len(df_ativo_filtrado) > 1 else preco_atual
+maximo = df_ativo_filtrado['Preço'].max()
+minimo = df_ativo_filtrado['Preço'].min()
+variacao_dia = ((preco_atual - preço_ontem) / preço_ontem) * 100 if preço_ontem else 0
+volatilidade = df_ativo_filtrado['Preço'].pct_change().std() * np.sqrt(len(df_ativo_filtrado)) * 100
+
+
+desvios = [preco_atual + i * media_desvios * preco_atual for i in range(1, dp)]
+desvios_percentuais = [(desvio - preco_atual) / preco_atual * 100 for desvio in desvios]
+desvios_neg = [preco_atual - i * media_desvios * preco_atual for i in range(1, dp)]
+desvios_neg_percentuais = [(desvio - preco_atual) / preco_atual * 100 for desvio in desvios_neg]
+
+
+preco_inicio_base = df_ativo_filtrado['Preço'].iloc[0]  # Primeiro preço da base filtrada
+variacao_base_filtrada = ((preco_atual - preco_inicio_base) / preco_inicio_base) * 100
+
+# Filtrar o primeiro dia do mês atual na base
+mes_atual_inicio = datetime(datetime.today().year, datetime.today().month, 1)
+df_mes_atual = df_ativo_filtrado[df_ativo_filtrado.index >= mes_atual_inicio]
+
+
+df_ativo_filtrado['Variação'] = df_ativo_filtrado['Preço'].pct_change()
+
+# Inicializar variáveis para sequências
+dias_seq_positiva = []
+dias_seq_negativa = []
+
+current_seq_positiva = []
+current_seq_negativa = []
+
+max_seq_positiva = 0
+max_seq_negativa = 0
+
+
+dias_var_positiva = df_ativo_filtrado[df_ativo_filtrado['Variação'] > (var_95_percentual/100)].index
+dias_var_negativa = df_ativo_filtrado[df_ativo_filtrado['Variação'] < -(var_95_percentual/100)].index
+
+df_ativo_filtrado['Media_50'] = df_ativo_filtrado['Preço'].rolling(window=50).mean()
+df_ativo_filtrado['Media_100'] = df_ativo_filtrado['Preço'].rolling(window=100).mean()
+df_ativo_filtrado['Media_200'] = df_ativo_filtrado['Preço'].rolling(window=200).mean()
+
+# Calcular os spreads entre o preço e as médias móveis
+df_ativo_filtrado['Spread_MM100'] = df_ativo_filtrado['Preço'] - df_ativo_filtrado['Media_100']
+df_ativo_filtrado['Spread_MM200'] = df_ativo_filtrado['Preço'] - df_ativo_filtrado['Media_200']
+
+df_ativo_ultimo_spread_mm100 = df_ativo_filtrado['Spread_MM100'][-1]
+df_ativo_ultimo_spread_mm200 = df_ativo_filtrado['Spread_MM200'][-1]
+
+# Calcular o desvio padrão dos spreads
+desvio_spread_100 = df_ativo_filtrado['Spread_MM100'].std()
+desvio_spread_200 = df_ativo_filtrado['Spread_MM200'].std()
+
+# Limites de 95% de confiança para os spreads
+limite_inferior_100 = df_ativo_filtrado['Spread_MM100'].mean() - z_95 * desvio_spread_100
+limite_superior_100 = df_ativo_filtrado['Spread_MM100'].mean() + z_95 * desvio_spread_100
+
+limite_inferior_200 = df_ativo_filtrado['Spread_MM200'].mean() - z_95 * desvio_spread_200
+limite_superior_200 = df_ativo_filtrado['Spread_MM200'].mean() + z_95 * desvio_spread_200
+
+# Filtrar os maiores valores registrados dos spreads
+maiores_spreads_100 = df_ativo_filtrado[df_ativo_filtrado['Spread_MM100'] > limite_superior_100]
+maiores_spreads_200 = df_ativo_filtrado[df_ativo_filtrado['Spread_MM200'] > limite_superior_200]
+
+st.title(f"Dados Quantitativos para o {ativo_selecionado}")
+
+cols = st.columns(5)
+
+# Linha 1
+cols[0].metric("Último Ajuste", f"{preco_atual:,.3f}")
+cols[1].metric("Variação do Dia (%)", f"{variacao_dia:.2f}%")
+cols[2].metric("Volatilidade Média (7, 14, 21 dias) (%)", f"{volatilidade_atual:.3f}%")
+cols[3].metric("Value at Risk (%)", f"{var_95_percentual:,.3f}% (95%)")
+cols[4].metric("Var % Base Filtrada", f"{variacao_base_filtrada:.2f}%")
+
+# Linha 2
+cols = st.columns(5)
+cols[0].metric("Var % Mensal", f"{variacao_mensal:.2f}%")
+cols[1].metric("Máx. Seq. Negativa", f"{max_seq_negativa} dias")
+cols[2].metric("Máx. Seq. Positiva", f"{max_seq_positiva} dias")
+cols[3].metric("Mínima do Período", f"{minimo:,.3f}")
+cols[4].metric("Máxima do Período", f"{maximo:,.3f}")
+
+# Linha 3 (condicional: médias móveis)
+if exibir_medias_moveis:
+    cols = st.columns(5)
+    cols[0].metric("Spread MM100", f"{df_ativo_ultimo_spread_mm100:.3f}")
+    cols[1].metric("Spread MM200", f"{df_ativo_ultimo_spread_mm200:.3f}")
+    cols[2].metric("Máx. Spread MM100 (VaR 95%)", f"{limite_superior_100:.3f}")
+    cols[3].metric("Spread MM200", f"{df_ativo_ultimo_spread_mm200:.3f}")
+    cols[4].metric("Máx. Spread MM200 (VaR 95%)", f"{limite_superior_200:.3f}")
+
 # Rodapé
 st.markdown("---")
 st.markdown("**Desenvolvido por Kauan Nunes - Trader QUANT**")
