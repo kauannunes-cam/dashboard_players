@@ -169,9 +169,6 @@ var_99_diario = z_99 * volatilidade_atual_decimal
 var_95_percentual = var_95_diario * 100
 var_99_percentual = var_99_diario * 100
 
-st.metric("Volatilidade Média (7, 14, 21 dias) (%)", f"{volatilidade_atual:.3f}%")
-st.write(f"Value at Risk Diário: {var_95_percentual:.3f}% (95%) / {var_99_percentual:.3f}% (99%)")
-
 # Configuração do gráfico
 fig = go.Figure()
 
