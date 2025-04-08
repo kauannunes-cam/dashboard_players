@@ -335,9 +335,11 @@ df_ativo_filtrado['Media_100'] = df_ativo_filtrado['Preço'].rolling(window=100)
 df_ativo_filtrado['Media_200'] = df_ativo_filtrado['Preço'].rolling(window=200).mean()
 
 # Calcular os spreads entre o preço e as médias móveis
+df_ativo_filtrado['Spread_MM50'] = df_ativo_filtrado['Preço'] - df_ativo_filtrado['Media_50']
 df_ativo_filtrado['Spread_MM100'] = df_ativo_filtrado['Preço'] - df_ativo_filtrado['Media_100']
 df_ativo_filtrado['Spread_MM200'] = df_ativo_filtrado['Preço'] - df_ativo_filtrado['Media_200']
 
+df_ativo_ultimo_spread_mm50 = df_ativo_filtrado['Spread_MM50'][-1]
 df_ativo_ultimo_spread_mm100 = df_ativo_filtrado['Spread_MM100'][-1]
 df_ativo_ultimo_spread_mm200 = df_ativo_filtrado['Spread_MM200'][-1]
 
