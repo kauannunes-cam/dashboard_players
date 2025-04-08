@@ -378,10 +378,10 @@ cols[4].metric("Máxima do Período", f"{maximo:,.3f}")
 # Linha 3 (condicional: médias móveis)
 if exibir_medias_moveis:
     cols = st.columns(5)
-    cols[0].metric("Spread MM100", f"{df_ativo_ultimo_spread_mm100:.3f}")
-    cols[1].metric("Spread MM200", f"{df_ativo_ultimo_spread_mm200:.3f}")
-    cols[2].metric("Máx. Spread MM100 (VaR 95%)", f"{limite_superior_100:.3f}")
-    cols[3].metric("Spread MM200", f"{df_ativo_ultimo_spread_mm200:.3f}")
+    cols[0].metric("Spread MM50", f"{df_ativo_ultimo_spread_mm50:.3f}")    
+    cols[1].metric("Spread MM100", f"{df_ativo_ultimo_spread_mm100:.3f}")
+    cols[2].metric("Spread MM200", f"{df_ativo_ultimo_spread_mm200:.3f}")
+    cols[3].metric("Máx. Spread MM100 (VaR 95%)", f"{limite_superior_100:.3f}")
     cols[4].metric("Máx. Spread MM200 (VaR 95%)", f"{limite_superior_200:.3f}")
 
 # Rodapé
