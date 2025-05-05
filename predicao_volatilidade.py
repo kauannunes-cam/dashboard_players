@@ -253,9 +253,9 @@ fig.add_layout_image(
         source=f'data:image/png;base64,{img_str}',
         xref="paper", yref="paper",
         x=0.5, y=0.5,
-        sizex=1, sizey=1,
+        sizex=1.2, sizey=1.2,
         xanchor="center", yanchor="middle",
-        opacity=0.6,
+        opacity=0.5,
         layer="below"
     )
 )
