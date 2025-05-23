@@ -222,7 +222,7 @@ for m, (up, down, perc_up, perc_down) in enumerate(zip(desvios, desvios_neg, des
          text=[''] * (len(df_ativo_filtrado.index[-15:]) - 1) + [f'+{m:.1f} Vol: {up:.2f} ({perc_up:+.2f}%)'],
          textposition="top center",
          textfont=dict(color="#FFFCF5", size=12),
-         showlegend=(i == 1),
+         showlegend=(m == 0.5),
          legendgroup="Desvios",
          name="Desvios" if i == 1 else None,
          opacity=0.8
