@@ -203,21 +203,23 @@ if exibir_medias_moveis:
 # Cálculo dos "desvios" (linhas de volatilidade)
 dp = 8
 preco_atual = df_ativo_filtrado['Preço'].iloc[-1]
-desvios = [preco_atual + i * media_desvios * preco_atual for i in range(1, dp)]
-desvios_neg = [preco_atual - i * media_desvios * preco_atual for i in range(1, dp)]
-desvios_percentuais = [(desvio - preco_atual) / preco_atual * 100 for desvio in desvios]
-desvios_neg_percentuais = [(desvio - preco_atual) / preco_atual * 100 for desvio in desvios_neg]
+multiplicadores = np.arange(0.5, dp, 0.5)
+desvios = [preco_atual + m * media_desvios * preco_atual for m in multiplicadores]
+desvios_neg = [preco_atual - m * media_desvios * preco_atual for m in multiplicadores]
+desvios_percentuais = [(d - preco_atual) / preco_atual * 100 for d in desvios]
+desvios_neg_percentuais = [(d - preco_atual) / preco_atual * 100 for d in desvios_neg]
+
 
 # Adiciona os traços de volatilidade (linhas "desvios") no gráfico
 # Usamos os últimos 15 registros para o eixo X (apenas para exibir as linhas de forma fixa)
-for i, (up, down, perc_up, perc_down) in enumerate(zip(desvios, desvios_neg, desvios_percentuais, desvios_neg_percentuais), start=1):
+for m, (up, down, perc_up, perc_down) in enumerate(zip(desvios, desvios_neg, desvios_percentuais, desvios_neg_percentuais), start=1):
     # Linha de desvio positivo
     fig.add_trace(go.Scatter(
          x=df_ativo_filtrado.index[-15:], 
          y=[up] * len(df_ativo_filtrado.index[-15:]),
          mode='lines+text',
          line=dict(dash='dash', color=brand_colors['VERDE_TEXTO']),
-         text=[''] * (len(df_ativo_filtrado.index[-15:]) - 1) + [f'+{i} Vol: {up:.2f} ({perc_up:+.2f}%)'],
+         text=[''] * (len(df_ativo_filtrado.index[-15:]) - 1) + [f'+{m:.1f} Vol: {up:.2f} ({perc_up:+.2f}%)'],
          textposition="top center",
          textfont=dict(color="#FFFCF5", size=12),
          showlegend=(i == 1),
