@@ -162,6 +162,7 @@ desvio_21d = variacao.rolling(window=21).std()
 
 # Média dos desvios (último valor)
 media_desvios = pd.concat([desvio_7d, desvio_14d, desvio_21d], axis=1).mean(axis=1).tail(1).values[0]
+media_desvios = media_desvios/2
 volatilidade_atual = (pd.concat([desvio_7d, desvio_14d, desvio_21d], axis=1).mean(axis=1).iloc[-1]) * 100
 volatilidade_atual_decimal = volatilidade_atual / 100
 var_95_diario = z_95 * volatilidade_atual_decimal
