@@ -217,7 +217,7 @@ for i, (up, down, perc_up, perc_down) in enumerate(zip(desvios, desvios_neg, des
          y=[up] * len(df_ativo_filtrado.index[-15:]),
          mode='lines+text',
          line=dict(dash='dash', color=brand_colors['VERDE_TEXTO']),
-         text=[''] * (len(df_ativo_filtrado.index[-15:]) - 1) + [f'+{i} DP: {up:.2f} ({perc_up:+.2f}%)'],
+         text=[''] * (len(df_ativo_filtrado.index[-15:]) - 1) + [f'+{i} Vol: {up:.2f} ({perc_up:+.2f}%)'],
          textposition="top center",
          textfont=dict(color="#FFFCF5", size=12),
          showlegend=(i == 1),
