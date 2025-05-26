@@ -201,28 +201,27 @@ if exibir_medias_moveis:
     ))
 
 # Cálculo dos "desvios" (linhas de volatilidade)
-dp = 8
+dp = 6
 preco_atual = df_ativo_filtrado['Preço'].iloc[-1]
-multiplicadores = np.arange(0.5, dp, 0.5)
-desvios = [preco_atual + m * media_desvios * preco_atual for m in multiplicadores]
-desvios_neg = [preco_atual - m * media_desvios * preco_atual for m in multiplicadores]
-desvios_percentuais = [(d - preco_atual) / preco_atual * 100 for d in desvios]
-desvios_neg_percentuais = [(d - preco_atual) / preco_atual * 100 for d in desvios_neg]
+desvios = [preco_atual + i * media_desvios * preco_atual for i in range(1, dp)]
+desvios_neg = [preco_atual - i * media_desvios * preco_atual for i in range(1, dp)]
+desvios_percentuais = [(desvio - preco_atual) / preco_atual * 100 for desvio in desvios]
+desvios_neg_percentuais = [(desvio - preco_atual) / preco_atual * 100 for desvio in desvios_neg]
 
 
 # Adiciona os traços de volatilidade (linhas "desvios") no gráfico
 # Usamos os últimos 15 registros para o eixo X (apenas para exibir as linhas de forma fixa)
-for m, (up, down, perc_up, perc_down) in enumerate(zip(desvios, desvios_neg, desvios_percentuais, desvios_neg_percentuais), start=1):
+for i, (up, down, perc_up, perc_down) in enumerate(zip(desvios, desvios_neg, desvios_percentuais, desvios_neg_percentuais), start=1):
     # Linha de desvio positivo
     fig.add_trace(go.Scatter(
          x=df_ativo_filtrado.index[-15:], 
          y=[up] * len(df_ativo_filtrado.index[-15:]),
          mode='lines+text',
          line=dict(dash='dash', color=brand_colors['VERDE_TEXTO']),
-         text=[''] * (len(df_ativo_filtrado.index[-15:]) - 1) + [f'+{m:.1f} Vol: {up:.2f} ({perc_up:+.2f}%)'],
+         text=[''] * (len(df_ativo_filtrado.index[-15:]) - 1) + [f'+{i} VOL: {up:.2f} ({perc_up:+.2f}%)'],
          textposition="top center",
          textfont=dict(color="#FFFCF5", size=12),
-         showlegend=(m == 0.5),
+         showlegend=(i == 0.5),
          legendgroup="Desvios",
          name="Desvios" if i == 1 else None,
          opacity=0.8
@@ -236,7 +235,7 @@ for m, (up, down, perc_up, perc_down) in enumerate(zip(desvios, desvios_neg, des
          text=[''] * (len(df_ativo_filtrado.index[-15:]) - 1) + [f'-{i} DP: {down:.2f} ({perc_down:+.2f}%)'],
          textposition="bottom center",
          textfont=dict(color="#FFFCF5", size=12),
-         showlegend=False,
+         showlegend=(i == 0.5),
          legendgroup="Desvios",
          opacity=0.8
     ))
@@ -386,8 +385,8 @@ if exibir_medias_moveis:
     cols[0].metric("Spread MM50", f"{df_ativo_ultimo_spread_mm50:.3f}")    
     cols[1].metric("Spread MM100", f"{df_ativo_ultimo_spread_mm100:.3f}")
     cols[2].metric("Spread MM200", f"{df_ativo_ultimo_spread_mm200:.3f}")
-    cols[3].metric("Máx. Spread MM100 (VaR 95%)", f"{limite_superior_100:.3f}")
-    cols[4].metric("Máx. Spread MM200 (VaR 95%)", f"{limite_superior_200:.3f}")
+    cols[3].metric("Máx. Spread MM100 (VaR 95%)", f"{limite_superior_200:.3f}")
+    cols[4].metric("Máx. Spread MM200 (VaR 95%)", f"{limite_superior_100:.3f}")
 
 # Rodapé
 st.markdown("---")
