@@ -4,6 +4,9 @@ import pandas as pd
 import streamlit as st
 import plotly.express as px
 from datetime import datetime, timedelta
+import urllib3
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # Cores da marca Cambirela
 brand_colors = {
@@ -18,7 +21,7 @@ brand_colors = {
 # Função para buscar a agenda via web scraping
 def buscar_agenda(data):
     url = f"https://www.gov.br/planalto/pt-br/acompanhe-o-planalto/agenda-do-presidente-da-republica-lula/agenda-do-presidente-da-republica/{data}"
-    response = requests.get(url)
+    response = requests.get(url, verify=False)
     
     if response.status_code != 200:
         return pd.DataFrame(), "Erro ao acessar a página"
