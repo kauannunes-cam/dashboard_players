@@ -332,6 +332,28 @@ for idx, var in enumerate(df_ativo_filtrado['Variação']):
         max_seq_negativa = len(current_seq_negativa)
         dias_seq_negativa = current_seq_negativa[:]
 
+
+seq_atual = 0
+alta_ou_baixa = "neutra"
+
+if not df_ativo_filtrado['Variação'].empty:
+    ultima_var = df_ativo_filtrado['Variação'].iloc[-1]
+
+    if ultima_var > 0:
+        alta_ou_baixa = "alta"
+        for var in reversed(df_ativo_filtrado['Variação']):
+            if var > 0:
+                seq_atual += 1
+            else:
+                break
+    elif ultima_var < 0:
+        alta_ou_baixa = "baixa"
+        for var in reversed(df_ativo_filtrado['Variação']):
+            if var < 0:
+                seq_atual += 1
+            else:
+                break
+
 df_ativo_filtrado['Media_50'] = df_ativo_filtrado['Preço'].rolling(window=50).mean()
 df_ativo_filtrado['Media_100'] = df_ativo_filtrado['Preço'].rolling(window=100).mean()
 df_ativo_filtrado['Media_200'] = df_ativo_filtrado['Preço'].rolling(window=200).mean()
@@ -372,12 +394,13 @@ cols[3].metric("Value at Risk (%)", f"{var_95_percentual:,.3f}% (95%)")
 cols[4].metric("Var % Base Filtrada", f"{variacao_base_filtrada:.2f}%")
 
 # Linha 2
-cols = st.columns(5)
+cols = st.columns(6)
 cols[0].metric("Var % Mensal", f"{variacao_mensal:.2f}%")
 cols[1].metric("Máx. Seq. Negativa", f"{max_seq_negativa} dias")
-cols[2].metric("Máx. Seq. Positiva", f"{max_seq_positiva} dias")
-cols[3].metric("Mínima do Período", f"{minimo:,.3f}")
-cols[4].metric("Máxima do Período", f"{maximo:,.3f}")
+cols[2].metric("Seq. Atual", f"{seq_atual} dias de {alta_ou_baixa}")
+cols[3].metric("Máx. Seq. Positiva", f"{max_seq_positiva} dias")
+cols[4].metric("Mínima do Período", f"{minimo:,.3f}")
+cols[5].metric("Máxima do Período", f"{maximo:,.3f}")
 
 # Linha 3 (condicional: médias móveis)
 if exibir_medias_moveis:
