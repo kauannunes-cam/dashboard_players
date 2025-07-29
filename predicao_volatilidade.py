@@ -340,14 +340,14 @@ if not df_ativo_filtrado['Variação'].empty:
     ultima_var = df_ativo_filtrado['Variação'].iloc[-1]
 
     if ultima_var > 0:
-        alta_ou_baixa = "alta"
+        alta_ou_baixa = "↑"
         for var in reversed(df_ativo_filtrado['Variação']):
             if var > 0:
                 seq_atual += 1
             else:
                 break
     elif ultima_var < 0:
-        alta_ou_baixa = "baixa"
+        alta_ou_baixa = "↓"
         for var in reversed(df_ativo_filtrado['Variação']):
             if var < 0:
                 seq_atual += 1
@@ -397,7 +397,7 @@ cols[4].metric("Var % Base Filtrada", f"{variacao_base_filtrada:.2f}%")
 cols = st.columns(6)
 cols[0].metric("Var % Mensal", f"{variacao_mensal:.2f}%")
 cols[1].metric("Máx. Seq. Negativa", f"{max_seq_negativa} dias")
-cols[2].metric("Seq. Atual", f"{seq_atual} dias de {alta_ou_baixa}")
+cols[2].metric("Seq. Atual", f"{seq_atual} {alta_ou_baixa}")
 cols[3].metric("Máx. Seq. Positiva", f"{max_seq_positiva} dias")
 cols[4].metric("Mínima do Período", f"{minimo:,.3f}")
 cols[5].metric("Máxima do Período", f"{maximo:,.3f}")
