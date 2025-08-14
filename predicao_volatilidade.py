@@ -308,8 +308,16 @@ fig.add_layout_image(
 
 st.plotly_chart(fig, use_container_width=True)
 
-mes_atual_inicio = datetime(datetime.today().year, datetime.today().month, 1)
+# ==============================
+# Métricas (todas já respeitando data_final)
+# ==============================
+mes_atual_inicio = datetime(data_final_ts.year, data_final_ts.month, 1)
 df_mes_atual = df_ativo_filtrado[df_ativo_filtrado.index >= mes_atual_inicio]
+
+preco_atual = df_ativo_filtrado['Preço'].iloc[-1]
+preco_ontem = df_ativo_filtrado['Preço'].iloc[-2] if len(df_ativo_filtrado) > 1 else np.nan
+variacao_dia = ((preco_atual - preco_ontem) / preco_ontem) * 100 if pd.notna(preco_ontem) else 0.0
+
 
 if not df_mes_atual.empty:
     preco_inicio_mes = df_mes_atual['Preço'].iloc[0]  # Primeiro preço do mês
@@ -458,5 +466,6 @@ if exibir_medias_moveis:
 # Rodapé
 st.markdown("---")
 st.markdown("**Desenvolvido por Kauan Nunes - Trader QUANT**")
+
 
 
