@@ -201,7 +201,6 @@ try:
         ultimo = float(df_ativo_filtrado['Preço'].iloc[-1])
         var_perc = (valor_proj - ultimo) / ultimo * 100
         direcao = "Alta" if var_perc > 0 else "Baixa"
-        st.title(f"A predição para o ativo {ativo_selecionado} é: {direcao}")
     else:
         st.title("Predição indisponível para o recorte selecionado.")
 except Exception as e:
@@ -482,4 +481,5 @@ if exibir_medias_moveis:
 # Rodapé
 st.markdown("---")
 st.markdown("**Desenvolvido por Kauan Nunes - Trader QUANT**")
+
 
