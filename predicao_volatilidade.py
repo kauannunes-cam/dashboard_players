@@ -155,8 +155,9 @@ with col2:
         "Data final",
         value=hoje_date,
         max_value=hoje_date,
-        format="DD/MM/YYYY"
+        format="DD/MM/YYYY",
     )
+    data_final_ts = pd.Timestamp(data_final)
 
 st.divider()
 
@@ -454,6 +455,7 @@ cols[3].metric("Máx. Seq. Positiva", f"{max_seq_positiva} dias")
 cols[4].metric("Mínima do Período", f"{minimo:,.3f}")
 cols[5].metric("Máxima do Período", f"{maximo:,.3f}")
 
+
 # Linha 3 (condicional: médias móveis)
 if exibir_medias_moveis:
     cols = st.columns(5)
@@ -466,6 +468,3 @@ if exibir_medias_moveis:
 # Rodapé
 st.markdown("---")
 st.markdown("**Desenvolvido por Kauan Nunes - Trader QUANT**")
-
-
-
