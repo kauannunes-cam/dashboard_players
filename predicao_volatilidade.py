@@ -133,10 +133,31 @@ st.title("Predição e Volatilidade")
 # Seletor de ativo e período (preset "1 ano" – índice 2)
 ativos_keys = list(ativos.keys())
 default_index = ativos_keys.index("WDOFUT") if "WDOFUT" in ativos_keys else 0
-ativo_selecionado = st.selectbox("Selecione o ativo:", ativos_keys, index=default_index)
-periodo_selecionado = st.selectbox("Selecione o período:", periodos_disponiveis, index=2)
-st.write("Visualizar Médias Móveis:")
-exibir_medias_moveis = st.checkbox("Exibir Médias Móveis (50, 100, 200 períodos)", value=True)
+col1, col2 = st.columns([3, 1])  # 3x mais espaço para a primeira coluna
+
+# Primeira coluna - ativo, período e médias móveis
+with col1:
+    ativo_selecionado = st.selectbox(
+        "Selecione o ativo:", ativos_keys, index=default_index
+    )
+    periodo_selecionado = st.selectbox(
+        "Selecione o período:", periodos_disponiveis, index=2
+    )
+    st.write("Visualizar Médias Móveis:")
+    exibir_medias_moveis = st.checkbox(
+        "Exibir Médias Móveis (50, 100, 200 períodos)", value=True
+    )
+
+# Segunda coluna - data final
+with col2:
+    hoje_date = datetime.today().date()
+    data_final = st.date_input(
+        "Data final",
+        value=hoje_date,
+        max_value=hoje_date,
+        format="DD/MM/YYYY"
+    )
+
 st.divider()
 
 # Filtragem dos dados do ativo selecionado
@@ -414,3 +435,4 @@ if exibir_medias_moveis:
 # Rodapé
 st.markdown("---")
 st.markdown("**Desenvolvido por Kauan Nunes - Trader QUANT**")
+
