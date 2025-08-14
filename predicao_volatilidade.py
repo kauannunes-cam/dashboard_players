@@ -51,6 +51,7 @@ def carregar_dados():
         df = pd.read_excel(xls, sheet_name=sheet_name, skiprows=2)
         df.columns.values[0] = 'Data'
         df.columns.values[1] = 'Preço'
+        df['Data'] = pd.to_datetime(df['Data'])
         df.set_index('Data', inplace=True)
         df.sort_index(inplace=True)
         ativos[sheet_name] = df
@@ -59,18 +60,31 @@ def carregar_dados():
 # Carrega os ativos reais a partir da base
 ativos = carregar_dados()
 
-def filtrar_por_periodo(df, periodo):
-    hoje = datetime.today()
+def filtrar_por_periodo(df, periodo, data_final):
+    # garante índice datetime e ordenado
+    if not isinstance(df.index, pd.DatetimeIndex):
+        df = df.copy()
+        df.index = pd.to_datetime(df.index)
+    df = df.sort_index()
+
+    # recorta até a data_final (inclusivo)
+    data_final = pd.Timestamp(data_final)
+    df = df.loc[:data_final]
+
+    if periodo == "Base Total":
+        return df
+
     if periodo == "60 dias":
-        inicio = hoje - timedelta(days=60)
+        inicio = data_final - pd.Timedelta(days=60)
     elif periodo == "6 meses":
-        inicio = hoje - timedelta(days=6 * 30)
+        inicio = data_final - pd.Timedelta(days=6 * 30)
     elif periodo == "1 ano":
-        inicio = hoje - timedelta(days=365)
+        inicio = data_final - pd.Timedelta(days=365)
     elif periodo == "5 anos":
-        inicio = hoje - timedelta(days=5 * 365)
+        inicio = data_final - pd.Timedelta(days=5 * 365)
     else:
         return df
+
     return df[df.index >= inicio]
 
 @st.cache_data
@@ -155,7 +169,7 @@ with col2:
         "Data final",
         value=hoje_date,
         max_value=hoje_date,
-        format="DD/MM/YYYY",
+        format="DD/MM/YYYY"
     )
     data_final_ts = pd.Timestamp(data_final)
 
@@ -468,3 +482,4 @@ if exibir_medias_moveis:
 # Rodapé
 st.markdown("---")
 st.markdown("**Desenvolvido por Kauan Nunes - Trader QUANT**")
+
