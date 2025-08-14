@@ -162,28 +162,51 @@ st.divider()
 
 # Filtragem dos dados do ativo selecionado
 df_ativo_original = ativos[ativo_selecionado]
-df_ativo_filtrado = filtrar_por_periodo(df_ativo_original, periodo_selecionado)
+df_ativo_filtrado = filtrar_por_periodo(df_ativo_original, periodo_selecionado, data_final_ts)
 
+if df_ativo_filtrado.empty:
+    st.warning("Sem dados no período selecionado até a data final escolhida.")
+    st.stop()
+    
 # Cálculo das médias móveis (se selecionado) – calculadas com base no DataFrame original
 if exibir_medias_moveis:
-    df_ativo_filtrado['Media_50'] = df_ativo_original['Preço'].rolling(window=50).mean()
-    df_ativo_filtrado['Media_100'] = df_ativo_original['Preço'].rolling(window=100).mean()
-    df_ativo_filtrado['Media_200'] = df_ativo_original['Preço'].rolling(window=200).mean()
+    mm50 = df_ativo_original['Preço'].rolling(window=50).mean()
+    mm100 = df_ativo_original['Preço'].rolling(window=100).mean()
+    mm200 = df_ativo_original['Preço'].rolling(window=200).mean()
+
+    df_ativo_filtrado = df_ativo_filtrado.copy()
+    df_ativo_filtrado['Media_50'] = mm50.reindex(df_ativo_filtrado.index)
+    df_ativo_filtrado['Media_100'] = mm100.reindex(df_ativo_filtrado.index)
+    df_ativo_filtrado['Media_200'] = mm200.reindex(df_ativo_filtrado.index)
+
+try:
+    preds, y_real = treinar_e_prever(df_ativo_filtrado)
+    if len(preds) > 0:
+        valor_proj = float(preds[-1][0])
+        ultimo = float(df_ativo_filtrado['Preço'].iloc[-1])
+        var_perc = (valor_proj - ultimo) / ultimo * 100
+        direcao = "Alta" if var_perc > 0 else "Baixa"
+        st.title(f"A predição para o ativo {ativo_selecionado} é: {direcao}")
+    else:
+        st.title("Predição indisponível para o recorte selecionado.")
+except Exception as e:
+    st.warning(f"Predição indisponível: {e}")
 
 # Análise de predição utilizando LSTM
 direcoes_mercado = get_direcao_projetada(ativos)
 if ativo_selecionado in direcoes_mercado:
     st.title(f"A predição para o ativo {ativo_selecionado} é: {direcoes_mercado[ativo_selecionado]}")
 
-# Cálculo das volatilidades (janelas de 7, 14 e 21 dias)
+# ==============================
+# Volatilidades (7, 14, 21)
+# ==============================
 variacao = df_ativo_filtrado['Preço'].pct_change().dropna()
 desvio_7d = variacao.rolling(window=7).std()
 desvio_14d = variacao.rolling(window=14).std()
 desvio_21d = variacao.rolling(window=21).std()
 
-# Média dos desvios (último valor)
 media_desvios = pd.concat([desvio_7d, desvio_14d, desvio_21d], axis=1).mean(axis=1).tail(1).values[0]
-media_desvios = media_desvios/2
+media_desvios = media_desvios / 2
 volatilidade_atual = (pd.concat([desvio_7d, desvio_14d, desvio_21d], axis=1).mean(axis=1).iloc[-1]) * 100
 volatilidade_atual_decimal = volatilidade_atual / 100
 var_95_diario = z_95 * volatilidade_atual_decimal
@@ -435,4 +458,5 @@ if exibir_medias_moveis:
 # Rodapé
 st.markdown("---")
 st.markdown("**Desenvolvido por Kauan Nunes - Trader QUANT**")
+
 
