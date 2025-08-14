@@ -147,7 +147,7 @@ st.title("Predição e Volatilidade")
 # Seletor de ativo e período (preset "1 ano" – índice 2)
 ativos_keys = list(ativos.keys())
 default_index = ativos_keys.index("WDOFUT") if "WDOFUT" in ativos_keys else 0
-col1, col2 = st.columns([3, 1])  # 3x mais espaço para a primeira coluna
+col1, col2 = st.columns([2, 1])  # 3x mais espaço para a primeira coluna
 
 # Primeira coluna - ativo, período e médias móveis
 with col1:
@@ -477,6 +477,7 @@ if exibir_medias_moveis:
 # Rodapé
 st.markdown("---")
 st.markdown("**Desenvolvido por Kauan Nunes - Trader QUANT**")
+
 
 
 
