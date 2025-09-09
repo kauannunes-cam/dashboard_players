@@ -272,7 +272,7 @@ for i, (up, down, perc_up, perc_down) in enumerate(zip(desvios, desvios_neg, des
          y=[up] * len(df_ativo_filtrado.index[-15:]),
          mode='lines+text',
          line=dict(dash='dash', color=brand_colors['VERDE_TEXTO']),
-         text=[''] * (len(df_ativo_filtrado.index[-15:]) - 1) + [f'+{i} VOL: {up:.2f} ({perc_up:+.2f}%)'],
+         text=[''] * (len(df_ativo_filtrado.index[-15:]) - 1) + [f'VOL: {up:.2f}'],
          textposition="top center",
          textfont=dict(color="#FFFCF5", size=12),
          showlegend=(i == 0.5),
@@ -286,7 +286,7 @@ for i, (up, down, perc_up, perc_down) in enumerate(zip(desvios, desvios_neg, des
          y=[down] * len(df_ativo_filtrado.index[-15:]),
          mode='lines+text',
          line=dict(dash='dash', color=brand_colors['VERDE_TEXTO']),
-         text=[''] * (len(df_ativo_filtrado.index[-15:]) - 1) + [f'-{i} DP: {down:.2f} ({perc_down:+.2f}%)'],
+         text=[''] * (len(df_ativo_filtrado.index[-15:]) - 1) + [f'VOL: {down:.2f}'],
          textposition="bottom center",
          textfont=dict(color="#FFFCF5", size=12),
          showlegend=(i == 0.5),
@@ -477,6 +477,7 @@ if exibir_medias_moveis:
 # Rodapé
 st.markdown("---")
 st.markdown("**Desenvolvido por Kauan Nunes - Trader QUANT**")
+
 
 
 
