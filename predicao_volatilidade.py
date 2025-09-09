@@ -451,7 +451,7 @@ cols = st.columns(5)
 # Linha 1
 cols[0].metric("Último Ajuste", f"{preco_atual:,.3f}")
 cols[1].metric("Variação do Dia (%)", f"{variacao_dia:.2f}%")
-cols[2].metric("Volatilidade Média (7, 14, 21 dias) (%)", f"{volatilidade_atual:.3f}%")
+cols[2].metric("Volatilidade Média (%)", f"{volatilidade_atual:.3f}%")
 cols[3].metric("Value at Risk (%)", f"{var_95_percentual:,.3f}% (95%)")
 cols[4].metric("Var % Base Filtrada", f"{variacao_base_filtrada:.2f}%")
 
@@ -477,6 +477,7 @@ if exibir_medias_moveis:
 # Rodapé
 st.markdown("---")
 st.markdown("**Desenvolvido por Kauan Nunes - Trader QUANT**")
+
 
 
 
