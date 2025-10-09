@@ -90,7 +90,7 @@ def filtrar_por_periodo(df, periodo, data_final):
 @st.cache_data
 def treinar_e_prever(dados_acao):
     # Seleciona os últimos 100 registros
-    dados_acao = dados_acao[['Preço']].tail(100)
+    dados_acao = dados_acao[['Preço']].tail(500)
     cotacao = dados_acao['Preço'].to_numpy().reshape(-1, 1)
     tamanho_treino = int(len(cotacao) * 0.8)
     
@@ -477,6 +477,7 @@ if exibir_medias_moveis:
 # Rodapé
 st.markdown("---")
 st.markdown("**Desenvolvido por Kauan Nunes - Trader QUANT**")
+
 
 
 
