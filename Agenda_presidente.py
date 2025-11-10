@@ -30,7 +30,7 @@ def buscar_agenda(data):
     compromissos = []
 
     # Coleta dos compromissos
-    for item in soup.find_all("li", class_="item-compromisso-wrapper"):
+    for item in soup.find_all("li", class_="list-compromissos-wrapper"):
         horario = item.find("time", class_="compromisso-inicio").get_text(strip=True) if item.find("time") else "N/A"
         titulo = item.find("h2", class_="compromisso-titulo").get_text(strip=True) if item.find("h2") else "N/A"
         local = item.find("div", class_="compromisso-local").get_text(strip=True) if item.find("div", class_="compromisso-local") else "N/A"
