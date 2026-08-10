@@ -78,6 +78,7 @@ def carregar_dados_cot():
         df.columns.values[1] = 'Preço'
         df.set_index('Data', inplace=True)
         df.sort_index(inplace=True, ascending=True)
+        df = df[~df.index.duplicated(keep='first')]
         ativos[sheet_name] = df
     return ativos
 

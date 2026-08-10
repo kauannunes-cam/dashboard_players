@@ -54,6 +54,7 @@ def carregar_dados():
         df['Data'] = pd.to_datetime(df['Data'])
         df.set_index('Data', inplace=True)
         df.sort_index(inplace=True)
+        df = df[~df.index.duplicated(keep='first')]
         ativos[sheet_name] = df
     return ativos
 
@@ -416,9 +417,13 @@ if not df_ativo_filtrado['Variação'].empty:
             else:
                 break
 
-df_ativo_filtrado['Media_50'] = df_ativo_filtrado['Preço'].rolling(window=50).mean()
-df_ativo_filtrado['Media_100'] = df_ativo_filtrado['Preço'].rolling(window=100).mean()
-df_ativo_filtrado['Media_200'] = df_ativo_filtrado['Preço'].rolling(window=200).mean()
+if 'Media_50' not in df_ativo_filtrado.columns:
+    mm50 = df_ativo_original['Preço'].rolling(window=50).mean()
+    mm100 = df_ativo_original['Preço'].rolling(window=100).mean()
+    mm200 = df_ativo_original['Preço'].rolling(window=200).mean()
+    df_ativo_filtrado['Media_50'] = mm50.reindex(df_ativo_filtrado.index)
+    df_ativo_filtrado['Media_100'] = mm100.reindex(df_ativo_filtrado.index)
+    df_ativo_filtrado['Media_200'] = mm200.reindex(df_ativo_filtrado.index)
 
 # Calcular os spreads entre o preço e as médias móveis
 df_ativo_filtrado['Spread_MM50'] = df_ativo_filtrado['Preço'] - df_ativo_filtrado['Media_50']

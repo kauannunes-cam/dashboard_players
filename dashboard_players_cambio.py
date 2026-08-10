@@ -91,6 +91,7 @@ for sheet_name in xls.sheet_names:
     df_selected = df[['Data', 'Preço']]
     df_selected.set_index('Data', inplace=True)
     df_sorted = df_selected.sort_index()
+    df_sorted = df_sorted[~df_sorted.index.duplicated(keep='first')]
     ativos[sheet_name] = df_sorted
 
 # Seleciona o UC1

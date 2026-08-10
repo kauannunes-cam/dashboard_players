@@ -87,6 +87,7 @@ def carregar_dados():
         df.dropna(subset=['Data', 'Preço'], inplace=True)
         df.set_index('Data', inplace=True)
         df.sort_index(inplace=True)
+        df = df[~df.index.duplicated(keep='first')]
         ativos[sheet_name] = df
     return ativos
 
